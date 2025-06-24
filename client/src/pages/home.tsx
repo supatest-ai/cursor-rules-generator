@@ -28,10 +28,6 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Hero Section */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="gradient-text">Cursor Rules</span>
-              <span className="text-gray-900"> Generator</span>
-            </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Create customized cursor rules for your project in minutes. Get AI-powered development assistance tailored to your codebase, framework, and coding style.
             </p>

@@ -238,9 +238,9 @@ export default function TechStackSelection() {
   return (
     <WizardStep stepNumber={1}>
       <div className="space-y-6">
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Choose Your Tech Stack</h3>
-          <p className="text-gray-600">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Choose Your Tech Stack</h2>
+          <p className="text-lg text-gray-600">
             Select technologies to generate optimized cursor rules. Start with a preset or build your own.
           </p>
         </div>

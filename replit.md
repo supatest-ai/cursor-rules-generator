@@ -119,8 +119,9 @@ This is a full-stack web application built as a Cursor Rules Generator - a tool 
 - ✓ Professional icon library integration using react-icons
 - ✓ Improved scrollable UI for large technology selection list
 - ✓ Redesigned technology selection with proper categorization
-- ✓ Added popular preset configurations (Modern Full-Stack, MERN, Vue.js, Enterprise)
-- ✓ Organized technologies into logical categories: Languages, Frontend/Backend, Database, etc.
+- ✓ Added popular preset configurations (Modern Full-Stack, MERN, Vue.js, Enterprise Monorepo)
+- ✓ Organized technologies into 12 logical categories: Languages & Runtimes, Frontend/Backend Frameworks, Styling & UI, Database & ORM, Frontend State Management, API & Data Fetching, Build Tools, Testing, Code Quality, Validation, Monorepo Tools, Animation, Deployment, Real-time
+- ✓ Comprehensive technology coverage: Deno, Bun, MySQL, SQLite, Playwright, shadcn/ui, Mantine, Zustand, Jotai, Zod, Valibot, Yup, Turborepo, Nx, Railway, PlanetScale, Neon, Drizzle ORM, Biome
 - ✓ Streamlined user experience with preset selection that populates individual technologies
 
 ## Changelog

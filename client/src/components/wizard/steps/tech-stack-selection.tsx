@@ -11,7 +11,6 @@ import {
   SiNodedotjs,
   SiTailwindcss,
   SiPrisma,
-  SiDrizzle,
   SiReactquery,
   SiZod,
   SiTypescript,
@@ -33,7 +32,6 @@ import {
   SiVite,
   SiEslint,
   SiPrettier,
-  SiBiome,
   SiDocker,
   SiVercel,
   SiNetlify,
@@ -57,7 +55,16 @@ import {
   SiGreensock,
   SiThreedotjs,
   SiD3Dotjs,
-  SiRedux
+  SiRedux,
+  SiDeno,
+  SiBun,
+  SiMysql,
+  SiSqlite,
+  SiMantine,
+  SiTurborepo,
+  SiNx,
+  SiRailway,
+  SiPlanetscale
 } from "react-icons/si";
 
 interface Technology {
@@ -68,10 +75,12 @@ interface Technology {
 }
 
 const technologies: Record<string, Technology[]> = {
-  "Languages": [
+  "Languages & Runtimes": [
     { id: "typescript", label: "TypeScript", icon: SiTypescript, color: "text-blue-600" },
     { id: "javascript", label: "JavaScript", icon: SiJavascript, color: "text-yellow-500" },
     { id: "python", label: "Python", icon: SiPython, color: "text-blue-500" },
+    { id: "deno", label: "Deno", icon: SiDeno, color: "text-black dark:text-white" },
+    { id: "bun", label: "Bun", icon: SiBun, color: "text-orange-600" },
   ],
   
   "Frontend Frameworks": [
@@ -92,7 +101,9 @@ const technologies: Record<string, Technology[]> = {
 
   "Styling & UI": [
     { id: "tailwind", label: "Tailwind CSS", icon: SiTailwindcss, color: "text-cyan-500" },
+    { id: "shadcn", label: "shadcn/ui", icon: SiReact, color: "text-gray-800 dark:text-white" },
     { id: "mui", label: "Material-UI", icon: SiMui, color: "text-blue-600" },
+    { id: "mantine", label: "Mantine", icon: SiMantine, color: "text-blue-500" },
     { id: "chakra", label: "Chakra UI", icon: SiChakraui, color: "text-teal-500" },
     { id: "antd", label: "Ant Design", icon: SiAntdesign, color: "text-blue-500" },
     { id: "bootstrap", label: "Bootstrap", icon: SiBootstrap, color: "text-purple-600" },
@@ -100,18 +111,27 @@ const technologies: Record<string, Technology[]> = {
   ],
 
   "Database & ORM": [
-    { id: "drizzle", label: "Drizzle ORM", icon: SiDrizzle, color: "text-green-600" },
+    { id: "drizzle", label: "Drizzle ORM", icon: SiPrisma, color: "text-green-600" },
     { id: "prisma", label: "Prisma ORM", icon: SiPrisma, color: "text-indigo-600" },
-    { id: "mongodb", label: "MongoDB", icon: SiMongodb, color: "text-green-600" },
     { id: "postgresql", label: "PostgreSQL", icon: SiPostgresql, color: "text-blue-700" },
+    { id: "mysql", label: "MySQL", icon: SiMysql, color: "text-orange-600" },
+    { id: "sqlite", label: "SQLite", icon: SiSqlite, color: "text-blue-500" },
+    { id: "mongodb", label: "MongoDB", icon: SiMongodb, color: "text-green-600" },
     { id: "redis", label: "Redis", icon: SiRedis, color: "text-red-600" },
     { id: "supabase", label: "Supabase", icon: SiSupabase, color: "text-green-500" },
     { id: "firebase", label: "Firebase", icon: SiFirebase, color: "text-orange-500" },
+    { id: "planetscale", label: "PlanetScale", icon: SiPlanetscale, color: "text-black dark:text-white" },
+    { id: "neon", label: "Neon", icon: SiSupabase, color: "text-green-400" },
   ],
 
-  "State Management": [
+  "Frontend State Management": [
     { id: "react-query", label: "React Query", icon: SiReactquery, color: "text-red-500" },
     { id: "redux", label: "Redux", icon: SiRedux, color: "text-purple-500" },
+    { id: "zustand", label: "Zustand", icon: SiReact, color: "text-orange-600" },
+    { id: "jotai", label: "Jotai", icon: SiReact, color: "text-gray-700" },
+  ],
+
+  "API & Data Fetching": [
     { id: "graphql", label: "GraphQL", icon: SiGraphql, color: "text-pink-500" },
     { id: "trpc", label: "tRPC", icon: SiTrpc, color: "text-blue-400" },
   ],
@@ -125,16 +145,27 @@ const technologies: Record<string, Technology[]> = {
 
   "Testing": [
     { id: "jest", label: "Jest", icon: SiJest, color: "text-red-600" },
-    { id: "cypress", label: "Cypress", icon: SiCypress, color: "text-gray-700" },
     { id: "vitest", label: "Vitest", icon: SiVitest, color: "text-yellow-500" },
+    { id: "cypress", label: "Cypress", icon: SiCypress, color: "text-gray-700" },
+    { id: "playwright", label: "Playwright", icon: SiCypress, color: "text-green-600" },
     { id: "storybook", label: "Storybook", icon: SiStorybook, color: "text-pink-500" },
   ],
 
   "Code Quality": [
-    { id: "biome", label: "Biome", icon: SiBiome, color: "text-green-500" },
+    { id: "biome", label: "Biome", icon: SiEslint, color: "text-green-500" },
     { id: "eslint", label: "ESLint", icon: SiEslint, color: "text-purple-600" },
     { id: "prettier", label: "Prettier", icon: SiPrettier, color: "text-gray-600" },
-    { id: "zod", label: "Zod Validation", icon: SiZod, color: "text-blue-600" },
+  ],
+
+  "Validation": [
+    { id: "zod", label: "Zod", icon: SiZod, color: "text-blue-600" },
+    { id: "valibot", label: "Valibot", icon: SiZod, color: "text-purple-500" },
+    { id: "yup", label: "Yup", icon: SiZod, color: "text-orange-500" },
+  ],
+
+  "Monorepo Tools": [
+    { id: "turborepo", label: "Turborepo", icon: SiTurborepo, color: "text-red-500" },
+    { id: "nx", label: "Nx", icon: SiNx, color: "text-blue-600" },
   ],
 
   "Auth & Payments": [
@@ -150,9 +181,10 @@ const technologies: Record<string, Technology[]> = {
   ],
 
   "Deployment": [
-    { id: "docker", label: "Docker", icon: SiDocker, color: "text-blue-500" },
     { id: "vercel", label: "Vercel", icon: SiVercel, color: "text-black" },
     { id: "netlify", label: "Netlify", icon: SiNetlify, color: "text-teal-500" },
+    { id: "railway", label: "Railway", icon: SiRailway, color: "text-purple-600" },
+    { id: "docker", label: "Docker", icon: SiDocker, color: "text-blue-500" },
     { id: "aws", label: "AWS", icon: SiAmazon, color: "text-orange-500" },
     { id: "gcp", label: "Google Cloud", icon: SiGooglecloud, color: "text-blue-500" },
     { id: "github-actions", label: "GitHub Actions", icon: SiGithubactions, color: "text-gray-800" },
@@ -165,8 +197,8 @@ const technologies: Record<string, Technology[]> = {
 
 const presets = {
   "Modern Full-Stack": [
-    "typescript", "react", "nextjs", "tailwind", "drizzle", "postgresql", 
-    "react-query", "zod", "eslint", "prettier", "jest", "vercel"
+    "typescript", "react", "nextjs", "shadcn", "tailwind", "drizzle", "postgresql", 
+    "react-query", "zod", "biome", "playwright", "vercel"
   ],
   "MERN Stack": [
     "javascript", "react", "nodejs", "express", "mongodb", "redux", 
@@ -174,11 +206,11 @@ const presets = {
   ],
   "Vue.js Ecosystem": [
     "typescript", "vue", "nodejs", "tailwind", "postgresql", "drizzle",
-    "vitest", "eslint", "prettier", "netlify"
+    "vitest", "biome", "netlify"
   ],
-  "Enterprise TypeScript": [
+  "Enterprise Monorepo": [
     "typescript", "react", "nextjs", "mui", "nestjs", "postgresql", 
-    "drizzle", "graphql", "jest", "storybook", "docker", "aws"
+    "drizzle", "graphql", "turborepo", "jest", "playwright", "docker", "aws"
   ]
 };
 

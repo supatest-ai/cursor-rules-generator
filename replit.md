@@ -115,6 +115,9 @@ This is a full-stack web application built as a Cursor Rules Generator - a tool 
 - ✓ Download functionality added - users can download individual files or all rules at once
 - ✓ Installation guide generation for proper .cursor/rules/ directory setup
 - ✓ Toast notifications for download completion feedback
+- ✓ Expanded technology selection with 40+ authentic technology icons
+- ✓ Professional icon library integration using react-icons
+- ✓ Improved scrollable UI for large technology selection list
 
 ## Changelog
 

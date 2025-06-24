@@ -8,6 +8,7 @@ import TaskTypes from "@/components/wizard/steps/task-types";
 import Documentation from "@/components/wizard/steps/documentation";
 import Review from "@/components/wizard/steps/review";
 import GeneratedRulesPanel from "@/components/generated-rules-panel";
+import SocialSlideshow from "@/components/social-slideshow";
 import { Folder } from "lucide-react";
 import { 
   SiReact, 
@@ -56,6 +57,11 @@ export default function Home() {
                 </code>
               </div>
             </div>
+          </div>
+
+          {/* Social Slideshow */}
+          <div className="mb-12">
+            <SocialSlideshow />
           </div>
 
           {/* Main Content */}

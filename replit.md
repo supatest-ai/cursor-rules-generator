@@ -102,11 +102,25 @@ This is a full-stack web application built as a Cursor Rules Generator - a tool 
 - **Production**: `NODE_ENV=production` with optimized static serving
 - **Database**: Environment-based connection string configuration
 
+## Recent Changes
+
+### June 24, 2025
+- ✓ Initial Cursor Rules Generator setup complete
+- ✓ Interactive 6-step wizard implementation
+- ✓ Framework selection (React, Vue, Next.js, Node.js)
+- ✓ Project structure and code style configuration
+- ✓ Task types and documentation setup
+- ✓ Generated rules panel with copy functionality
+- ✓ Rules preview modal for viewing .mdc files
+- ✓ Download functionality added - users can download individual files or all rules at once
+- ✓ Installation guide generation for proper .cursor/rules/ directory setup
+- ✓ Toast notifications for download completion feedback
+
 ## Changelog
 
 ```
 Changelog:
-- June 24, 2025. Initial setup
+- June 24, 2025. Initial setup and full feature implementation
 ```
 
 ## User Preferences

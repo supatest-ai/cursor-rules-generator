@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { useToast } from "@/hooks/use-toast";
 import { useWizard } from "./wizard/wizard-provider";
-import { CheckCircle, Clock, Copy } from "lucide-react";
+import { CheckCircle, Clock, Copy, Download } from "lucide-react";
+import { downloadAllRulesAsFiles } from "@/lib/download-utils";
 import RulesPreviewModal from "./rules-preview-modal";
 
 export default function GeneratedRulesPanel() {
   const { generatedRules } = useWizard();
   const { copyToClipboard, isCopying } = useCopyToClipboard();
+  const { toast } = useToast();
   const [selectedRule, setSelectedRule] = useState<string | null>(null);
 
   const staticRules = generatedRules.filter(rule => rule.isStatic);
@@ -23,6 +26,15 @@ export default function GeneratedRulesPanel() {
       .join('\n\n---\n\n');
     
     copyToClipboard(allRulesContent, "All rules copied to clipboard");
+  };
+
+  const handleDownloadAll = () => {
+    downloadAllRulesAsFiles(generatedRules, () => {
+      toast({
+        title: "Download Complete",
+        description: `${generatedRules.length} rule files and installation guide downloaded successfully`,
+      });
+    });
   };
 
   const hasGeneratedRules = generatedRules.length > 0;
@@ -145,19 +157,32 @@ export default function GeneratedRulesPanel() {
           )}
         </div>
 
-        <div className="p-4 border-t border-gray-200">
-          <Button
-            onClick={handleCopyAll}
-            disabled={!hasGeneratedRules || isCopying}
-            className="w-full"
-            variant={hasGeneratedRules ? "default" : "secondary"}
-          >
-            {hasGeneratedRules ? "Copy All Rules" : "Copy All Rules"}
-          </Button>
-          <p className="text-xs text-gray-500 mt-2 text-center">
+        <div className="p-4 border-t border-gray-200 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              onClick={handleCopyAll}
+              disabled={!hasGeneratedRules || isCopying}
+              variant={hasGeneratedRules ? "default" : "secondary"}
+              size="sm"
+            >
+              <Copy className="h-4 w-4 mr-1" />
+              Copy All
+            </Button>
+            <Button
+              onClick={handleDownloadAll}
+              disabled={!hasGeneratedRules}
+              variant="outline"
+              size="sm"
+              className="gradient-bg text-white hover:opacity-90 border-0"
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Download
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500 text-center">
             {hasGeneratedRules 
               ? "Place files in .cursor/rules/ directory" 
-              : "Complete the wizard to enable copying"
+              : "Complete the wizard to enable downloading"
             }
           </p>
         </div>

@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { useWizard } from "./wizard/wizard-provider";
-import { Copy, X } from "lucide-react";
+import { downloadTextFile } from "@/lib/download-utils";
+import { Copy, Download, X } from "lucide-react";
 
 interface RulesPreviewModalProps {
   ruleFilename: string;
@@ -26,6 +27,12 @@ export default function RulesPreviewModal({
   const handleCopyRule = () => {
     if (selectedRule) {
       copyToClipboard(selectedRule.content, `${selectedRule.filename} copied to clipboard`);
+    }
+  };
+
+  const handleDownloadRule = () => {
+    if (selectedRule) {
+      downloadTextFile(selectedRule.content, selectedRule.filename);
     }
   };
 
@@ -72,15 +79,25 @@ export default function RulesPreviewModal({
           <div className="flex-1 flex flex-col">
             <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
               <h5 className="font-medium text-gray-900">{selectedRuleFile}</h5>
-              <Button
-                onClick={handleCopyRule}
-                disabled={isCopying}
-                size="sm"
-                className="gradient-bg text-white hover:opacity-90"
-              >
-                <Copy className="h-4 w-4 mr-1" />
-                Copy
-              </Button>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleCopyRule}
+                  disabled={isCopying}
+                  size="sm"
+                  variant="outline"
+                >
+                  <Copy className="h-4 w-4 mr-1" />
+                  Copy
+                </Button>
+                <Button
+                  onClick={handleDownloadRule}
+                  size="sm"
+                  className="gradient-bg text-white hover:opacity-90"
+                >
+                  <Download className="h-4 w-4 mr-1" />
+                  Download
+                </Button>
+              </div>
             </div>
             
             <ScrollArea className="flex-1">

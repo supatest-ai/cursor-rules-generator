@@ -79,6 +79,7 @@ const technologies: Record<string, Technology[]> = {
     { id: "typescript", label: "TypeScript", icon: SiTypescript, color: "text-blue-600" },
     { id: "javascript", label: "JavaScript", icon: SiJavascript, color: "text-yellow-500" },
     { id: "python", label: "Python", icon: SiPython, color: "text-blue-500" },
+    { id: "nodejs", label: "Node.js", icon: SiNodedotjs, color: "text-green-600" },
     { id: "deno", label: "Deno", icon: SiDeno, color: "text-black dark:text-white" },
     { id: "bun", label: "Bun", icon: SiBun, color: "text-orange-600" },
   ],
@@ -93,7 +94,6 @@ const technologies: Record<string, Technology[]> = {
   ],
 
   "Backend Frameworks": [
-    { id: "nodejs", label: "Node.js", icon: SiNodedotjs, color: "text-green-600" },
     { id: "express", label: "Express.js", icon: SiExpress, color: "text-gray-700" },
     { id: "fastify", label: "Fastify", icon: SiFastify, color: "text-black" },
     { id: "nestjs", label: "NestJS", icon: SiNestjs, color: "text-red-500" },

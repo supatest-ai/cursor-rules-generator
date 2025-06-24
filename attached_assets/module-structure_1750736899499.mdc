@@ -1,0 +1,132 @@
+---
+description: Use this when you need to understand module structure in each package
+globs: 
+alwaysApply: false
+---
+# Module Structure Guide
+
+## Frontend Module (`frontend/`)
+```
+frontend/
+├── src/               # Source code
+│   ├── components/    # Reusable React components
+│   ├── pages/        # Page components and routing
+│   ├── hooks/        # Custom React hooks
+│   ├── utils/        # Utility functions
+│   ├── styles/       # Global styles and themes
+│   ├── types/        # TypeScript type definitions
+│   ├── api/          # API integration layer
+│   └── store/        # State management
+├── public/           # Static assets
+├── tests/           # Test files
+├── dist/            # Build output
+└── config files     # Various configuration files
+    ├── vite.config.ts
+    ├── tailwind.config.cjs
+    ├── tsconfig.json
+    └── postcss.config.cjs
+```
+
+## API Module (`api/`)
+```
+api/
+├── src/
+│   ├── controllers/  # Request handlers
+│   ├── services/    # Business logic
+│   ├── models/      # Data models
+│   ├── middleware/  # Express middleware
+│   ├── routes/      # API route definitions
+│   ├── utils/       # Utility functions
+│   └── config/      # Configuration
+├── drizzle/         # Database migrations and schema
+├── tests/          # Test files
+└── config files
+    ├── drizzle.config.ts
+    ├── jest.config.js
+    └── tsconfig.json
+```
+
+## Runner Module (`runner/`)
+```
+runner/
+├── src/
+│   ├── core/        # Core runner functionality
+│   ├── executors/   # Test execution logic
+│   ├── reporters/   # Test result reporting
+│   ├── utils/       # Utility functions
+│   └── types/       # TypeScript types
+├── tests/          # Test files
+├── test-results/   # Test execution results
+└── config files
+    ├── playwright.config.ts
+    └── tsconfig.json
+```
+
+## UI Module (`ui/`)
+```
+ui/
+├── src/
+│   ├── components/  # Shared UI components
+│   ├── styles/     # Component styles
+│   ├── hooks/      # Shared hooks
+│   ├── utils/      # UI utilities
+│   └── types/      # Component types
+├── stories/        # Storybook stories
+└── tests/         # Component tests
+```
+
+## Extension Module (`extension/`)
+```
+extension/
+├── src/
+│   ├── background/  # Background scripts
+│   ├── content/     # Content scripts
+│   ├── popup/       # Extension popup UI
+│   ├── utils/       # Extension utilities
+│   └── types/       # TypeScript types
+├── public/         # Static assets
+└── manifest.json   # Extension manifest
+```
+
+## Shared Module (`shared/`)
+```
+shared/
+├── src/
+│   ├── types/      # Common type definitions
+│   ├── utils/      # Shared utilities
+│   ├── constants/  # Shared constants
+│   └── helpers/    # Helper functions
+└── tests/         # Unit tests
+```
+
+## Key Integration Points
+
+1. **Frontend ↔ API**
+   - API client integration in `frontend/src/api`
+   - Type sharing through `shared` module
+   - Environment-specific configurations
+
+2. **Runner ↔ API**
+   - Test execution results reporting
+   - Configuration management
+   - Status updates and logging
+
+3. **Extension ↔ Frontend**
+   - Shared UI components from `ui` module
+   - Common state management
+   - Message passing protocols
+
+## Module Dependencies
+- All modules depend on `shared` for common types and utilities
+- Frontend and Extension depend on `ui` for components
+- API provides services to Frontend, Runner, and Extension
+- Runner integrates with API for result reporting
+
+## Best Practices
+1. Keep module boundaries clear and well-defined
+2. Use shared types from the `shared` module
+3. Maintain consistent directory structure within each module
+4. Follow the established naming conventions
+5. Keep cross-module dependencies documented
+6. Use proper error handling across module boundaries
+7. Maintain proper versioning for inter-module compatibility

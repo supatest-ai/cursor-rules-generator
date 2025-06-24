@@ -1,6 +1,21 @@
 import { useWizard } from "../wizard-provider";
 import WizardStep from "../wizard-step";
-import { Code, Bug, RotateCcw, TestTube, BookOpen, Database } from "lucide-react";
+import { 
+  SiJest,
+  SiTestinglibrary,
+  SiGithubactions,
+  SiPostgresql,
+  SiMongodb,
+  SiRedis
+} from "react-icons/si";
+import { 
+  Code, 
+  Bug, 
+  RotateCcw, 
+  BookOpen, 
+  Database,
+  TestTube2
+} from "lucide-react";
 
 const taskTypes = [
   {
@@ -28,7 +43,7 @@ const taskTypes = [
     id: "testing",
     name: "Testing",
     description: "Unit and integration tests",
-    icon: TestTube,
+    icon: SiJest,
     color: "text-green-500"
   },
   {
@@ -42,8 +57,8 @@ const taskTypes = [
     id: "database",
     name: "Database Operations",
     description: "Schema and query optimization",
-    icon: Database,
-    color: "text-purple-500"
+    icon: SiPostgresql,
+    color: "text-blue-600"
   }
 ];
 

@@ -9,6 +9,14 @@ import Documentation from "@/components/wizard/steps/documentation";
 import Review from "@/components/wizard/steps/review";
 import GeneratedRulesPanel from "@/components/generated-rules-panel";
 import { Folder } from "lucide-react";
+import { 
+  SiReact, 
+  SiVuedotjs, 
+  SiNextdotjs, 
+  SiNodedotjs,
+  SiTypescript,
+  SiTailwindcss
+} from "react-icons/si";
 
 export default function Home() {
   return (
@@ -26,6 +34,17 @@ export default function Home() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Create customized cursor rules for your project in minutes. Get AI-powered development assistance tailored to your codebase, framework, and coding style.
             </p>
+            
+            {/* Technology Icons */}
+            <div className="flex justify-center items-center space-x-6 mb-8">
+              <SiReact className="w-8 h-8 text-blue-500" />
+              <SiVuedotjs className="w-8 h-8 text-green-500" />
+              <SiNextdotjs className="w-8 h-8 text-black dark:text-white" />
+              <SiNodedotjs className="w-8 h-8 text-green-600" />
+              <SiTypescript className="w-8 h-8 text-blue-600" />
+              <SiTailwindcss className="w-8 h-8 text-cyan-500" />
+            </div>
+            
             <div className="flex justify-center">
               <div className="bg-white rounded-xl shadow-lg p-6 max-w-lg">
                 <div className="flex items-center space-x-3 mb-3">

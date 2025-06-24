@@ -118,9 +118,10 @@ This is a full-stack web application built as a Cursor Rules Generator - a tool 
 - ✓ Expanded technology selection with 40+ authentic technology icons
 - ✓ Professional icon library integration using react-icons
 - ✓ Improved scrollable UI for large technology selection list
-- ✓ Added social media slideshow featuring latest tweets and YouTube videos
-- ✓ Interactive slideshow with auto-play, manual navigation, and tab switching
-- ✓ Professional design with authentic social media styling and branding
+- ✓ Redesigned technology selection with proper categorization
+- ✓ Added popular preset configurations (Modern Full-Stack, MERN, Vue.js, Enterprise)
+- ✓ Organized technologies into logical categories: Languages, Frontend/Backend, Database, etc.
+- ✓ Streamlined user experience with preset selection that populates individual technologies
 
 ## Changelog
 

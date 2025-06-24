@@ -1,14 +1,14 @@
 import Header from "@/components/header";
 import { WizardProvider } from "@/components/wizard/wizard-provider";
 import ProgressBar from "@/components/wizard/progress-bar";
-import FrameworkSelection from "@/components/wizard/steps/framework-selection";
+import TechStackSelection from "@/components/wizard/steps/tech-stack-selection";
 import ProjectStructure from "@/components/wizard/steps/project-structure";
 import CodeStyle from "@/components/wizard/steps/code-style";
 import TaskTypes from "@/components/wizard/steps/task-types";
 import Documentation from "@/components/wizard/steps/documentation";
 import Review from "@/components/wizard/steps/review";
 import GeneratedRulesPanel from "@/components/generated-rules-panel";
-import SocialSlideshow from "@/components/social-slideshow";
+
 import { Folder } from "lucide-react";
 import { 
   SiReact, 
@@ -59,11 +59,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Social Slideshow */}
-          <div className="mb-12">
-            <SocialSlideshow />
-          </div>
-
           {/* Main Content */}
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Wizard Panel */}
@@ -71,7 +66,7 @@ export default function Home() {
               <div className="bg-white rounded-xl shadow-lg">
                 <ProgressBar />
                 
-                <FrameworkSelection />
+                <TechStackSelection />
                 <ProjectStructure />
                 <CodeStyle />
                 <TaskTypes />

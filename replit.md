@@ -127,6 +127,8 @@ This is a full-stack web application built as a Cursor Rules Generator - a tool 
 - ✓ Moved Node.js to Languages & Runtimes category
 - ✓ Simplified main heading to "Choose Your Tech Stack" in navigation bar
 - ✓ Removed redundant "Project Setup Wizard" heading to save space
+- ✓ Removed hero section to display wizard directly
+- ✓ Added beautiful gradient logo with Code2 icon and lightning bolt accent
 
 ## Changelog
 

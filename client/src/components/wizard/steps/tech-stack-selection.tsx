@@ -11,6 +11,7 @@ import {
   SiNodedotjs,
   SiTailwindcss,
   SiPrisma,
+  SiDrizzle,
   SiReactquery,
   SiZod,
   SiTypescript,
@@ -32,6 +33,7 @@ import {
   SiVite,
   SiEslint,
   SiPrettier,
+  SiBiome,
   SiDocker,
   SiVercel,
   SiNetlify,
@@ -98,6 +100,7 @@ const technologies: Record<string, Technology[]> = {
   ],
 
   "Database & ORM": [
+    { id: "drizzle", label: "Drizzle ORM", icon: SiDrizzle, color: "text-green-600" },
     { id: "prisma", label: "Prisma ORM", icon: SiPrisma, color: "text-indigo-600" },
     { id: "mongodb", label: "MongoDB", icon: SiMongodb, color: "text-green-600" },
     { id: "postgresql", label: "PostgreSQL", icon: SiPostgresql, color: "text-blue-700" },
@@ -128,6 +131,7 @@ const technologies: Record<string, Technology[]> = {
   ],
 
   "Code Quality": [
+    { id: "biome", label: "Biome", icon: SiBiome, color: "text-green-500" },
     { id: "eslint", label: "ESLint", icon: SiEslint, color: "text-purple-600" },
     { id: "prettier", label: "Prettier", icon: SiPrettier, color: "text-gray-600" },
     { id: "zod", label: "Zod Validation", icon: SiZod, color: "text-blue-600" },
@@ -161,7 +165,7 @@ const technologies: Record<string, Technology[]> = {
 
 const presets = {
   "Modern Full-Stack": [
-    "typescript", "react", "nextjs", "tailwind", "prisma", "postgresql", 
+    "typescript", "react", "nextjs", "tailwind", "drizzle", "postgresql", 
     "react-query", "zod", "eslint", "prettier", "jest", "vercel"
   ],
   "MERN Stack": [
@@ -169,12 +173,12 @@ const presets = {
     "jest", "eslint", "prettier", "docker"
   ],
   "Vue.js Ecosystem": [
-    "typescript", "vue", "nodejs", "tailwind", "postgresql", "prisma",
+    "typescript", "vue", "nodejs", "tailwind", "postgresql", "drizzle",
     "vitest", "eslint", "prettier", "netlify"
   ],
   "Enterprise TypeScript": [
     "typescript", "react", "nextjs", "mui", "nestjs", "postgresql", 
-    "prisma", "graphql", "jest", "storybook", "docker", "aws"
+    "drizzle", "graphql", "jest", "storybook", "docker", "aws"
   ]
 };
 

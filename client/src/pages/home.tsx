@@ -1,4 +1,5 @@
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 import { WizardProvider } from "@/components/wizard/wizard-provider";
 import ProgressBar from "@/components/wizard/progress-bar";
 import TechStackSelection from "@/components/wizard/steps/tech-stack-selection";
@@ -40,6 +41,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </WizardProvider>
   );

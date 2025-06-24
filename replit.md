@@ -129,6 +129,9 @@ This is a full-stack web application built as a Cursor Rules Generator - a tool 
 - ✓ Removed redundant "Project Setup Wizard" heading to save space
 - ✓ Removed hero section to display wizard directly
 - ✓ Added beautiful gradient logo with Code2 icon and lightning bolt accent
+- ✓ Added rounded corners to Supatest AI logo
+- ✓ Created footer with "Made with ❤️ by Supatest AI"
+- ✓ Added clickable links to both header logo and footer text pointing to https://supatest.ai
 
 ## Changelog
 

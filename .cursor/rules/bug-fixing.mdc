@@ -1,0 +1,45 @@
+---
+description: Bug fixing methodology and best practices
+globs: 
+alwaysApply: false
+---
+# Bug Fixing Guidelines
+
+## Investigation Process
+1. Reproduce the bug reliably
+2. Identify the root cause, not just symptoms
+3. Check for similar issues in the codebase
+4. Consider impact on other features
+
+## Fix Implementation
+- Make minimal changes to fix the issue
+- Add tests to prevent regression
+- Update documentation if needed
+- Consider backwards compatibility
+
+## Verification
+- Test the specific bug scenario
+- Run related test suites
+- Check for side effects in other areas
+- Verify fix works across environments
+
+## Code Examples:
+
+```typescript
+// Good: Defensive programming to prevent bugs
+function processUserData(data: unknown): User {
+  // Validate input to prevent runtime errors
+  if (!isValidUserData(data)) {
+    throw new ValidationError('Invalid user data format');
+  }
+  
+  // Handle edge cases
+  const processedData = {
+    ...data,
+    name: data.name?.trim() || 'Unknown',
+    email: data.email?.toLowerCase() || null
+  };
+  
+  return processedData;
+}
+```

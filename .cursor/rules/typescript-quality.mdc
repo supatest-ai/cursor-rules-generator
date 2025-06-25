@@ -1,0 +1,49 @@
+---
+description: TypeScript quality standards for React projects
+globs: "**/*.{ts,tsx}"
+alwaysApply: true
+---
+# TypeScript Quality Standards
+
+## Type Safety
+- Always use strict mode
+- No `any` types allowed (use `unknown` instead)
+- Define interfaces for all props and state
+- Use proper type guards for runtime checks
+
+## Interface Design
+- Use descriptive interface names with `I` prefix or without
+- Define props interfaces close to components
+- Export reusable types from dedicated files
+- Use generic types for reusable components
+
+## Best Practices
+- Use type assertions sparingly and safely
+- Prefer union types over enums when appropriate
+- Use `readonly` for arrays and objects that shouldn't change
+- Implement proper error handling with typed errors
+
+## Code Examples:
+
+```typescript
+// Good: Proper interface definition
+interface UserProps {
+  user: User;
+  onUpdate: (user: User) => void;
+  isLoading?: boolean;
+}
+
+const UserComponent: React.FC<UserProps> = ({ user, onUpdate, isLoading = false }) => {
+  // Implementation
+};
+
+// Good: Type guard
+function isUser(obj: unknown): obj is User {
+  return typeof obj === 'object' && obj !== null && 'id' in obj;
+}
+
+// Bad: Using any
+const badFunction = (data: any) => {
+  // No type safety
+};
+```

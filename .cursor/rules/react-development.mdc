@@ -1,0 +1,53 @@
+---
+description: React development best practices and patterns
+globs: "**/*.{tsx,jsx}"
+alwaysApply: false
+---
+# React Development Guidelines
+
+## Component Structure
+- Use functional components with hooks
+- Prefer composition over inheritance
+- Keep components small and focused (< 100 lines)
+- Use PascalCase for component names
+
+## State Management
+- Use useState for local state
+- Use useReducer for complex state logic
+- Consider context for global state
+- Avoid prop drilling beyond 2-3 levels
+
+## Performance Optimization
+- Use React.memo for expensive components
+- Implement useMemo and useCallback when needed
+- Avoid creating objects/functions in render
+- Use proper dependency arrays
+
+## Code Examples:
+
+```tsx
+// Good: Clean functional component
+const UserProfile = ({ userId }: { userId: string }) => {
+  const [user, setUser] = useState<User | null>(null);
+  
+  useEffect(() => {
+    fetchUser(userId).then(setUser);
+  }, [userId]);
+
+  if (!user) return <LoadingSpinner />;
+  
+  return (
+    <div className="user-profile">
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+    </div>
+  );
+};
+
+// Bad: Complex component with mixed concerns
+const BadComponent = () => {
+  // Too much logic mixed together
+  // Multiple responsibilities
+  // Hard to test and maintain
+};
+```

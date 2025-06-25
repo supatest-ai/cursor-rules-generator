@@ -1,0 +1,42 @@
+---
+description: Project structure guidelines and organization
+globs: 
+alwaysApply: false
+---
+# Project Structure Guidelines
+
+## Directory Organization
+- Project Type: single
+- Source Directory: src/
+- Component Organization: type-based
+
+## File Naming Conventions
+- Components: camelCase
+- Files: camelCase
+- Import Style: relative
+
+## Structure Requirements
+
+- Single application structure
+- Clear separation of concerns
+- Modular component organization
+
+
+## Best Practices
+- Keep related files together
+- Use consistent naming across the project
+- Maintain clear import/export patterns
+- Document architectural decisions
+
+## Code Examples:
+
+```
+src/
+
+├── components/
+├── hooks/
+├── services/
+├── pages/
+└── utils/
+
+```

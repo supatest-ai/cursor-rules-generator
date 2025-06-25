@@ -1,0 +1,51 @@
+---
+description: Testing guidelines and best practices
+globs: "**/*.{test,spec}.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+# Testing Guidelines
+
+## Test Structure
+- Follow Arrange-Act-Assert pattern
+- Use descriptive test names
+- Group related tests with describe blocks
+- Keep tests independent and isolated
+
+## Test Types
+- Unit tests for individual functions/components
+- Integration tests for feature workflows
+- End-to-end tests for critical user journeys
+- Visual regression tests for UI components
+
+## Best Practices
+- Test behavior, not implementation
+- Use proper mocking strategies
+- Maintain good test coverage
+- Keep tests fast and reliable
+
+## Code Examples:
+
+```typescript
+// Good: Well-structured test
+describe('UserService', () => {
+  describe('createUser', () => {
+    it('should create user with valid data', async () => {
+      // Arrange
+      const userData = { name: 'John Doe', email: 'john@example.com' };
+      const mockUser = { id: '1', ...userData };
+      jest.spyOn(userRepository, 'create').mockResolvedValue(mockUser);
+      
+      // Act
+      const result = await userService.createUser(userData);
+      
+      // Assert
+      expect(result).toEqual(mockUser);
+      expect(userRepository.create).toHaveBeenCalledWith(userData);
+    });
+    
+    it('should throw error for duplicate email', async () => {
+      // Test error scenarios
+    });
+  });
+});
+```

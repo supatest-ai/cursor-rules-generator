@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { HelpCircle, MousePointer2, Code2, Zap } from "lucide-react";
+import { HelpCircle, MousePointer2, Code2, Zap, Sparkles } from "lucide-react";
 
 export default function Header() {
   return (
@@ -30,11 +30,9 @@ export default function Header() {
             rel="noopener noreferrer"
             className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
           >
-            <img 
-              src="https://supatest.ai/logo.png" 
-              alt="Supatest AI" 
-              className="h-8 w-8 rounded-xl"
-            />
+            <div className="h-8 w-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center shadow-md">
+              <Sparkles className="text-white h-4 w-4" />
+            </div>
             <span className="text-lg font-semibold text-gray-900">
               Supatest AI
             </span>

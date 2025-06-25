@@ -22,8 +22,6 @@ import {
   SiRedis,
   SiSupabase,
   SiFirebase,
-  SiStripe,
-  SiAuth0,
   SiJest,
   SiCypress,
   SiVitest,
@@ -64,7 +62,10 @@ import {
   SiTurborepo,
   SiNx,
   SiRailway,
-  SiPlanetscale
+  SiPlanetscale,
+  SiNpm,
+  SiPnpm,
+  SiYarn
 } from "react-icons/si";
 
 interface Technology {
@@ -82,6 +83,13 @@ const technologies: Record<string, Technology[]> = {
     { id: "nodejs", label: "Node.js", icon: SiNodedotjs, color: "text-green-600" },
     { id: "deno", label: "Deno", icon: SiDeno, color: "text-black dark:text-white" },
     { id: "bun", label: "Bun", icon: SiBun, color: "text-orange-600" },
+  ],
+
+  "Package Managers": [
+    { id: "npm", label: "npm", icon: SiNpm, color: "text-red-600" },
+    { id: "pnpm", label: "pnpm", icon: SiPnpm, color: "text-orange-500" },
+    { id: "yarn", label: "Yarn", icon: SiYarn, color: "text-blue-500" },
+    { id: "bun-pm", label: "Bun", icon: SiBun, color: "text-orange-600" },
   ],
   
   "Frontend Frameworks": [
@@ -136,8 +144,6 @@ const technologies: Record<string, Technology[]> = {
     { id: "trpc", label: "tRPC", icon: SiTrpc, color: "text-blue-400" },
   ],
 
-
-
   "Build Tools": [
     { id: "vite", label: "Vite", icon: SiVite, color: "text-purple-500" },
     { id: "webpack", label: "Webpack", icon: SiWebpack, color: "text-blue-400" },
@@ -168,11 +174,6 @@ const technologies: Record<string, Technology[]> = {
     { id: "nx", label: "Nx", icon: SiNx, color: "text-blue-600" },
   ],
 
-  "Auth & Payments": [
-    { id: "auth0", label: "Auth0", icon: SiAuth0, color: "text-orange-500" },
-    { id: "stripe", label: "Stripe", icon: SiStripe, color: "text-purple-500" },
-  ],
-
   "Animation": [
     { id: "framer", label: "Framer Motion", icon: SiFramer, color: "text-black" },
     { id: "gsap", label: "GSAP", icon: SiGreensock, color: "text-green-500" },
@@ -198,19 +199,19 @@ const technologies: Record<string, Technology[]> = {
 const presets = {
   "Modern Full-Stack": [
     "typescript", "react", "nextjs", "shadcn", "tailwind", "drizzle", "postgresql", 
-    "react-query", "zod", "biome", "playwright", "vercel"
+    "react-query", "zod", "biome", "playwright", "vercel", "pnpm"
   ],
   "MERN Stack": [
     "javascript", "react", "nodejs", "express", "mongodb", "redux", 
-    "jest", "eslint", "prettier", "docker"
+    "jest", "eslint", "prettier", "docker", "npm"
   ],
   "Vue.js Ecosystem": [
     "typescript", "vue", "nodejs", "tailwind", "postgresql", "drizzle",
-    "vitest", "biome", "netlify"
+    "vitest", "biome", "netlify", "pnpm"
   ],
   "Enterprise Monorepo": [
     "typescript", "react", "nextjs", "mui", "nestjs", "postgresql", 
-    "drizzle", "graphql", "turborepo", "jest", "playwright", "docker", "aws"
+    "drizzle", "graphql", "turborepo", "jest", "playwright", "docker", "aws", "pnpm"
   ]
 };
 

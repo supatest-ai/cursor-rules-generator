@@ -6,7 +6,7 @@ const WizardContext = createContext<WizardContextType | undefined>(undefined);
 
 const initialFormData: WizardFormData = {
   framework: "react",
-  additionalTech: ["tailwind", "zod"],
+  additionalTech: ["tailwind", "zod", "pnpm"],
   projectType: "monorepo",
   sourceDirectory: "src/",
   componentOrganization: "feature-based",

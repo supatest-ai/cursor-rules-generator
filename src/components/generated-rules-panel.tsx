@@ -137,6 +137,16 @@ export default function GeneratedRulesPanel() {
               <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg opacity-50">
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm font-medium text-gray-600">development-workflow.mdc</span>
+                </div>
+                <Button variant="ghost" size="sm" disabled className="text-gray-400 cursor-not-allowed">
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg opacity-50">
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-gray-400" />
                   <span className="text-sm font-medium text-gray-600">testing-guidelines.mdc</span>
                 </div>
                 <Button variant="ghost" size="sm" disabled className="text-gray-400 cursor-not-allowed">

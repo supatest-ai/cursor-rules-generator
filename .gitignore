@@ -7,3 +7,6 @@ vite.config.ts.*
 .env
 firebase-debug.log*
 .firebase
+
+test-results
+playwright-report

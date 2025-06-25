@@ -4,3 +4,6 @@ dist
 vite.config.ts.*
 *.tar.gz
 .pnpm-debug.log*
+.env
+firebase-debug.log*
+.firebase

@@ -206,7 +206,7 @@ const presets = {
     "jest", "eslint", "prettier", "docker", "npm"
   ],
   "Vue.js Ecosystem": [
-    "typescript", "vue", "nodejs", "tailwind", "postgresql", "drizzle",
+    "typescript", "vue", "nodejs", "vite", "tailwind", "postgresql", "drizzle",
     "vitest", "biome", "netlify", "pnpm"
   ],
   "Enterprise Monorepo": [

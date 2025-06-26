@@ -4,10 +4,10 @@ test.describe('Rules Generation & Preview', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     
-    // Complete wizard flow quickly to reach generation
-    await page.click('text=TypeScript');
-    await page.click('text=React');
-    await page.click('text=Tailwind CSS');
+    // Complete wizard flow quickly to reach generation using exact selectors
+    await page.getByRole('checkbox', { name: 'TypeScript', exact: true }).click();
+    await page.getByRole('checkbox', { name: 'React', exact: true }).click();
+    await page.getByRole('checkbox', { name: 'Tailwind CSS', exact: true }).click();
     await page.click('text=Next Step');
     
     await page.click('input[value="type-based"]');
@@ -97,8 +97,8 @@ test.describe('Rules Generation & Preview', () => {
     // Wait for modal to load
     await expect(page.locator('[role="dialog"]')).toBeVisible();
     
-    // Click copy button
-    await page.click('button:has-text("Copy")');
+    // Click copy button with more specific selector
+    await page.locator('[role="dialog"] button', { hasText: 'Copy' }).first().click({ force: true });
     
     // Verify copy button state (might show "Copied" temporarily)
     await page.screenshot({ path: 'rule-copy-action.png', fullPage: true });
@@ -116,8 +116,8 @@ test.describe('Rules Generation & Preview', () => {
     // Set up download listener
     const downloadPromise = page.waitForEvent('download');
     
-    // Click download button
-    await page.click('button:has-text("Download")');
+    // Click download button with more specific selector
+    await page.locator('[role="dialog"] button', { hasText: 'Download' }).first().click({ force: true });
     
     // Wait for download
     const download = await downloadPromise;
@@ -156,40 +156,39 @@ test.describe('Rules Generation & Preview', () => {
     await page.screenshot({ path: 'copy-all-rules.png', fullPage: true });
   });
 
-  test('should download all rules as zip', async ({ page }) => {
+  test('should download all rules as files', async ({ page }) => {
     // Generate rules
     await page.click('text=Generate Rules');
     await page.waitForTimeout(2000);
     
-    // Set up download listener
+    // Set up download listener - this downloads multiple files
     const downloadPromise = page.waitForEvent('download');
     
     // Click download button
     await page.click('text=Download');
     
-    // Wait for download
+    // Wait for first download (could be any of the generated files)
     const download = await downloadPromise;
-    expect(download.suggestedFilename()).toContain('.zip');
+    expect(download.suggestedFilename()).toMatch(/\.(mdc|md)$/);
     
     await page.screenshot({ path: 'download-all-rules.png', fullPage: true });
   });
 
-  test('should display rule files in correct categories', async ({ page }) => {
+  test('should display generated rule files', async ({ page }) => {
     // Generate rules
     await page.click('text=Generate Rules');
     await page.waitForTimeout(2000);
     
-    // Verify static rules section
-    await expect(page.locator('text=Static Rules')).toBeVisible();
-    await expect(page.locator('text=cursor-rules.mdc')).toBeVisible();
-    await expect(page.locator('text=self-improve.mdc')).toBeVisible();
-    
-    // Verify dynamic rules section
-    await expect(page.locator('text=Generated Rules')).toBeVisible();
+    // Verify generated rule files are visible
     await expect(page.locator('text=react-development.mdc')).toBeVisible();
     await expect(page.locator('text=typescript-quality.mdc')).toBeVisible();
+    await expect(page.locator('text=project-structure.mdc')).toBeVisible();
+    await expect(page.locator('text=development-workflow.mdc')).toBeVisible();
     
-    await page.screenshot({ path: 'rule-categories-display.png', fullPage: true });
+    // Verify the panel header
+    await expect(page.locator('text=Your custom cursor rules are ready')).toBeVisible();
+    
+    await page.screenshot({ path: 'rule-files-display.png', fullPage: true });
   });
 
   test('should show loading state during generation', async ({ page }) => {

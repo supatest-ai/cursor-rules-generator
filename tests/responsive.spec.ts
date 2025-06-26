@@ -19,7 +19,7 @@ test.describe('Responsive Design', () => {
       // Verify header is visible and properly laid out
       await expect(page.locator('header')).toBeVisible();
       await expect(page.locator('text=Cursor Rules Generator')).toBeVisible();
-      await expect(page.locator('text=Supatest AI')).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Supatest AI', exact: true })).toBeVisible();
       
       // Verify main content is visible
       await expect(page.locator('text=Project Setup Wizard')).toBeVisible();
@@ -50,7 +50,7 @@ test.describe('Responsive Design', () => {
     await page.click('text=React');
     
     // Verify selections work
-    await expect(page.locator('text=TypeScript').locator('..').locator('[data-state="checked"]')).toBeVisible();
+    await expect(page.getByRole('checkbox', { name: 'TypeScript', exact: true })).toBeChecked();
     
     // Navigate to next step
     await page.click('text=Next Step');
@@ -91,8 +91,8 @@ test.describe('Responsive Design', () => {
     await page.waitForTimeout(500);
     
     // Verify selections are maintained
-    await expect(page.locator('text=TypeScript').locator('..').locator('[data-state="checked"]')).toBeVisible();
-    await expect(page.locator('text=React').locator('..').locator('[data-state="checked"]')).toBeVisible();
+    await expect(page.getByRole('checkbox', { name: 'TypeScript', exact: true })).toBeChecked();
+    await expect(page.getByRole('checkbox', { name: 'React', exact: true })).toBeChecked();
     
     // Change to tablet
     await page.setViewportSize({ width: 768, height: 1024 });
@@ -198,7 +198,7 @@ test.describe('Responsive Design', () => {
     
     // Verify layout adapted
     await expect(page.locator('text=Cursor Rules Generator')).toBeVisible();
-    await expect(page.locator('text=TypeScript').locator('..').locator('[data-state="checked"]')).toBeVisible();
+    await expect(page.getByRole('checkbox', { name: 'TypeScript', exact: true })).toBeChecked();
     
     // Take landscape screenshot
     await page.screenshot({ path: 'tablet-landscape-layout.png', fullPage: true });
@@ -218,7 +218,7 @@ test.describe('Responsive Design', () => {
     
     // Scroll more
     await page.evaluate(() => window.scrollTo(0, 1000));
-    await expect(page.locator('text=Testing')).toBeVisible();
+    await expect(page.locator('label', { hasText: 'Testing' })).toBeVisible();
     
     await page.screenshot({ path: 'small-screen-scrolling.png', fullPage: true });
   });

@@ -8,9 +8,9 @@ test.describe('Wizard Flow Navigation', () => {
   test('should complete full wizard flow', async ({ page }) => {
     // Step 1: Tech Stack Selection
     await expect(page.locator('text=Step 1 of 6')).toBeVisible();
-    await page.getByRole('checkbox', { name: 'TypeScript' }).click();
-    await page.getByRole('checkbox', { name: 'React' }).click();
-    await page.getByRole('checkbox', { name: 'Tailwind CSS' }).click();
+    await page.getByRole('checkbox', { name: 'TypeScript', exact: true }).click();
+    await page.getByRole('checkbox', { name: 'React', exact: true }).click();
+    await page.getByRole('checkbox', { name: 'Tailwind CSS', exact: true }).click();
     await page.click('text=Next Step');
 
     // Step 2: Project Structure
@@ -35,24 +35,24 @@ test.describe('Wizard Flow Navigation', () => {
     await expect(page.locator('text=Step 3 of 6')).toBeVisible();
     await expect(page.locator('text=Code Style Preferences')).toBeVisible();
     
-    await page.getByRole('checkbox', { name: 'Require JSDoc comments' }).click();
+    await page.click('text=Require JSDoc comments');
     await page.click('text=Relative imports (./components/Button)');
     await page.click('text=Next Step');
 
     // Step 4: Task Types
     await expect(page.locator('text=Step 4 of 6')).toBeVisible();
-    await expect(page.locator('text=Development Tasks')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Development Tasks' })).toBeVisible();
     
-    await page.getByRole('checkbox', { name: 'Refactoring' }).click();
-    await page.getByRole('checkbox', { name: 'Documentation' }).click();
+    await page.click('text=Refactoring');
+    await page.click('text=Documentation');
     await page.click('text=Next Step');
 
     // Step 5: Documentation
     await expect(page.locator('text=Step 5 of 6')).toBeVisible();
     await expect(page.locator('text=Documentation Requirements')).toBeVisible();
     
-    await page.getByRole('checkbox', { name: 'TODO comments for future improvements' }).click();
-    await page.getByRole('checkbox', { name: 'Contributing guidelines' }).click();
+    await page.click('text=TODO comments for future improvements');
+    await page.click('text=Contributing guidelines');
     await page.click('text=Next Step');
 
     // Step 6: Review
@@ -64,7 +64,7 @@ test.describe('Wizard Flow Navigation', () => {
 
   test('should navigate backwards through wizard steps', async ({ page }) => {
     // Navigate to step 3
-    await page.getByRole('checkbox', { name: 'TypeScript' }).click();
+    await page.getByRole('checkbox', { name: 'TypeScript', exact: true }).click();
     await page.click('text=Next Step'); // Step 2
     await page.click('text=Next Step'); // Step 3
     
@@ -82,8 +82,8 @@ test.describe('Wizard Flow Navigation', () => {
 
   test('should maintain form state during navigation', async ({ page }) => {
     // Fill form data in step 1
-    await page.getByRole('checkbox', { name: 'TypeScript' }).click();
-    await page.getByRole('checkbox', { name: 'React' }).click();
+    await page.getByRole('checkbox', { name: 'TypeScript', exact: true }).click();
+    await page.getByRole('checkbox', { name: 'React', exact: true }).click();
     await page.click('text=Next Step');
     
     // Fill form data in step 2
@@ -102,8 +102,8 @@ test.describe('Wizard Flow Navigation', () => {
     await page.click('text=Previous');
     
     // Verify tech stack selections are maintained
-    await expect(page.getByRole('checkbox', { name: 'TypeScript' })).toBeChecked();
-    await expect(page.getByRole('checkbox', { name: 'React' })).toBeChecked();
+    await expect(page.getByRole('checkbox', { name: 'TypeScript', exact: true })).toBeChecked();
+    await expect(page.getByRole('checkbox', { name: 'React', exact: true })).toBeChecked();
     
     await page.screenshot({ path: 'wizard-state-persistence.png', fullPage: true });
   });
@@ -145,15 +145,15 @@ test.describe('Wizard Flow Navigation', () => {
 
   test('should handle form interactions correctly', async ({ page }) => {
     // Test checkbox interactions in step 1
-    await page.getByRole('checkbox', { name: 'TypeScript' }).click();
-    await expect(page.getByRole('checkbox', { name: 'TypeScript' })).toBeChecked();
+    await page.getByRole('checkbox', { name: 'TypeScript', exact: true }).click();
+    await expect(page.getByRole('checkbox', { name: 'TypeScript', exact: true })).toBeChecked();
     
     // Uncheck and recheck
-    await page.getByRole('checkbox', { name: 'TypeScript' }).click();
-    await expect(page.getByRole('checkbox', { name: 'TypeScript' })).not.toBeChecked();
+    await page.getByRole('checkbox', { name: 'TypeScript', exact: true }).click();
+    await expect(page.getByRole('checkbox', { name: 'TypeScript', exact: true })).not.toBeChecked();
     
-    await page.getByRole('checkbox', { name: 'TypeScript' }).click();
-    await expect(page.getByRole('checkbox', { name: 'TypeScript' })).toBeChecked();
+    await page.getByRole('checkbox', { name: 'TypeScript', exact: true }).click();
+    await expect(page.getByRole('checkbox', { name: 'TypeScript', exact: true })).toBeChecked();
     
     await page.click('text=Next Step');
     

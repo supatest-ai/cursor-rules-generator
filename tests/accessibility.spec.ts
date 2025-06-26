@@ -71,12 +71,12 @@ test.describe('Accessibility', () => {
     await expect(h1Elements).toHaveCount(1);
     await expect(h1Elements.first()).toContainText('Cursor Rules Generator');
     
-    // Check heading structure in wizard
-    await expect(page.locator('h3')).toContainText('Choose Your Tech Stack');
+    // Check heading structure in wizard content area (not the side panel)
+    await expect(page.getByRole('heading', { name: 'Choose Your Tech Stack' })).toBeVisible();
     
     // Navigate to next step and check heading hierarchy
     await page.click('text=Next Step');
-    await expect(page.locator('h3')).toContainText('Project Structure');
+    await expect(page.getByRole('heading', { name: 'Project Structure' })).toBeVisible();
     
     await page.screenshot({ path: 'heading-hierarchy.png', fullPage: true });
   });
@@ -92,7 +92,7 @@ test.describe('Accessibility', () => {
     }
     
     // Download button should be disabled before generation
-    const downloadButton = page.locator('text=Download').last();
+    const downloadButton = page.locator('button:has-text("Download")');
     await expect(downloadButton).toBeDisabled();
     
     await page.screenshot({ path: 'button-states-accessibility.png', fullPage: true });

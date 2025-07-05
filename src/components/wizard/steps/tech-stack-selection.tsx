@@ -4,10 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  SiReact, 
-  SiVuedotjs, 
-  SiNextdotjs, 
+import {
+  SiReact,
+  SiVuedotjs,
+  SiNextdotjs,
   SiNodedotjs,
   SiTailwindcss,
   SiPrisma,
@@ -91,7 +91,7 @@ const technologies: Record<string, Technology[]> = {
     { id: "yarn", label: "Yarn", icon: SiYarn, color: "text-blue-500" },
     { id: "bun-pm", label: "Bun", icon: SiBun, color: "text-orange-600" },
   ],
-  
+
   "Frontend Frameworks": [
     { id: "react", label: "React", icon: SiReact, color: "text-blue-500" },
     { id: "nextjs", label: "Next.js", icon: SiNextdotjs, color: "text-black dark:text-white" },
@@ -190,19 +190,15 @@ const technologies: Record<string, Technology[]> = {
     { id: "gcp", label: "Google Cloud", icon: SiGooglecloud, color: "text-blue-500" },
     { id: "github-actions", label: "GitHub Actions", icon: SiGithubactions, color: "text-gray-800" },
   ],
-
-  "Real-time": [
-    { id: "socketio", label: "Socket.io", icon: SiSocketdotio, color: "text-gray-800" },
-  ]
 };
 
 const presets = {
   "Modern Full-Stack": [
-    "typescript", "react", "nextjs", "shadcn", "tailwind", "drizzle", "postgresql", 
+    "typescript", "react", "nextjs", "shadcn", "tailwind", "drizzle", "postgresql",
     "react-query", "zod", "biome", "playwright", "vercel", "pnpm"
   ],
   "MERN Stack": [
-    "javascript", "react", "nodejs", "express", "mongodb", "redux", 
+    "javascript", "react", "nodejs", "express", "mongodb", "redux",
     "jest", "eslint", "prettier", "docker", "npm"
   ],
   "Vue.js Ecosystem": [
@@ -210,7 +206,7 @@ const presets = {
     "vitest", "biome", "netlify", "pnpm"
   ],
   "Enterprise Monorepo": [
-    "typescript", "react", "nextjs", "mui", "nestjs", "postgresql", 
+    "typescript", "react", "nextjs", "mui", "nestjs", "postgresql",
     "drizzle", "graphql", "turborepo", "jest", "playwright", "docker", "aws", "pnpm"
   ]
 };
@@ -222,7 +218,7 @@ export default function TechStackSelection() {
     const updatedTech = checked
       ? [...formData.additionalTech, techId]
       : formData.additionalTech.filter(t => t !== techId);
-    
+
     updateFormData({ additionalTech: updatedTech });
   };
 
@@ -287,13 +283,12 @@ export default function TechStackSelection() {
               </Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {techs.map((tech) => (
-                  <label 
-                    key={tech.id} 
-                    className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all ${
-                      isSelected(tech.id)
-                        ? 'border-purple-300 bg-purple-50 dark:bg-purple-900/20'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
+                  <label
+                    key={tech.id}
+                    className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all ${isSelected(tech.id)
+                      ? 'border-purple-300 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
                   >
                     <Checkbox
                       checked={isSelected(tech.id)}

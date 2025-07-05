@@ -9,10 +9,8 @@ export default function Header() {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <a 
-            href="https://supatest.ai" 
-            target="_blank" 
-            rel="noopener noreferrer"
+          <a
+            href="/"
             className="flex items-center space-x-3 hover:opacity-90 transition-opacity"
           >
             <div className="relative">
@@ -27,16 +25,16 @@ export default function Header() {
               Cursor Rules Generator
             </h1>
           </a>
-          <a 
-            href="https://supatest.ai" 
-            target="_blank" 
+          <a
+            href="https://supatest.ai"
+            target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
           >
             {!imageError ? (
-              <img 
-                src="https://supatest.ai/logo.png" 
-                alt="Supatest AI" 
+              <img
+                src="https://supatest.ai/logo.png"
+                alt="Supatest AI"
                 className="h-8 w-8 rounded-xl object-cover"
                 onError={() => setImageError(true)}
               />

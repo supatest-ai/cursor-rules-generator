@@ -81,15 +81,15 @@ function generateDevelopmentWorkflowRule(formData: WizardFormData): string {
   const hasLinting = formData.additionalTech.some(tech => ['eslint', 'biome', 'prettier'].includes(tech));
   const buildTool = formData.additionalTech.includes('webpack') ? 'webpack' : 'vite';
   const hasTypeScript = formData.additionalTech.includes('typescript');
-  
+
   // Dynamic commands based on package manager
   const installCommand = packageManager === 'npm' ? 'install' : 'add';
-  const devInstallFlag = packageManager === 'npm' ? '--save-dev' : 
-                        packageManager === 'yarn' ? '--dev' : '-D';
+  const devInstallFlag = packageManager === 'npm' ? '--save-dev' :
+    packageManager === 'yarn' ? '--dev' : '-D';
   const updateCommand = packageManager === 'yarn' ? 'upgrade' : 'update';
-  const pruneCommand = packageManager === 'yarn' ? 'autoclean' : 
-                      packageManager === 'bun' ? 'clean' : 'prune';
-  
+  const pruneCommand = packageManager === 'yarn' ? 'autoclean' :
+    packageManager === 'bun' ? 'clean' : 'prune';
+
   return `---
 description: Development workflow and command reference
 globs: 
@@ -253,65 +253,625 @@ ${formData.componentOrganization === 'feature-based' ? `
 }
 
 function generateCodeQualityRule(formData: WizardFormData): string {
+  const hasTypeScript = formData.additionalTech.includes('typescript');
+  const hasReact = formData.framework === 'react';
+  const hasLinting = formData.additionalTech.some(tech => ['eslint', 'biome', 'prettier'].includes(tech));
+  const hasTesting = formData.additionalTech.some(tech => ['jest', 'vitest', 'cypress', 'playwright'].includes(tech));
+
   return `---
-description: Code quality standards and best practices
+description: Comprehensive code quality standards and best practices based on industry research
 globs: 
 alwaysApply: true
 ---
-# Code Quality Standards
+# Code Quality Excellence Framework
 
-## Code Quality Rules
+## Core Quality Principles
+
+### The SOLID Foundation
+Apply SOLID principles for maintainable, scalable code:
+
+\`\`\`typescript
+// Good: Single Responsibility Principle
+class UserValidator {
+  validate(user: UserData): ValidationResult {
+    const errors: string[] = [];
+    
+    if (!this.isValidEmail(user.email)) {
+      errors.push('Invalid email format');
+    }
+    
+    if (!this.isValidAge(user.age)) {
+      errors.push('Age must be between 13 and 120');
+    }
+    
+    return { isValid: errors.length === 0, errors };
+  }
+  
+  private isValidEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+  
+  private isValidAge(age: number): boolean {
+    return age >= 13 && age <= 120;
+  }
+}
+
+// Good: Open/Closed Principle - extensible without modification
+abstract class PaymentProcessor {
+  abstract process(payment: Payment): Promise<PaymentResult>;
+  
+  protected logTransaction(payment: Payment, result: PaymentResult): void {
+    this.logger.info('Payment processed', { payment, result });
+  }
+}
+
+class CreditCardProcessor extends PaymentProcessor {
+  async process(payment: Payment): Promise<PaymentResult> {
+    const result = await this.creditCardGateway.charge(payment);
+    this.logTransaction(payment, result);
+    return result;
+  }
+}
+
+class PayPalProcessor extends PaymentProcessor {
+  async process(payment: Payment): Promise<PaymentResult> {
+    const result = await this.paypalGateway.execute(payment);
+    this.logTransaction(payment, result);
+    return result;
+  }
+}
+\`\`\`
+
+### Defensive Programming
+Build robust code that handles edge cases gracefully:
+
+\`\`\`typescript
+// Good: Comprehensive input validation and error handling
+class UserService {
+  async createUser(userData: CreateUserRequest): Promise<User> {
+    // Validate preconditions
+    this.validateCreateUserRequest(userData);
+    
+    // Normalize and sanitize input
+    const normalizedData = this.normalizeUserData(userData);
+    
+    // Check business rules
+    await this.validateBusinessRules(normalizedData);
+    
+    try {
+      // Create user with transaction
+      const user = await this.database.transaction(async (tx) => {
+        const createdUser = await this.userRepository.create(normalizedData, tx);
+        await this.profileRepository.createDefault(createdUser.id, tx);
+        await this.auditRepository.logUserCreation(createdUser.id, tx);
+        return createdUser;
+      });
+      
+      // Send welcome email asynchronously
+      this.emailService.sendWelcomeEmail(user.email)
+        .catch(error => this.logger.error('Failed to send welcome email', { userId: user.id, error }));
+      
+      return user;
+    } catch (error) {
+      this.logger.error('User creation failed', { userData: normalizedData, error });
+      
+      if (error.code === 'UNIQUE_VIOLATION') {
+        throw new ConflictError('User with this email already exists');
+      }
+      
+      throw new InternalServerError('Failed to create user');
+    }
+  }
+  
+  private validateCreateUserRequest(data: CreateUserRequest): void {
+    const schema = z.object({
+      email: z.string().email('Invalid email format'),
+      name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
+      age: z.number().int().min(13, 'Must be 13 or older').max(120, 'Invalid age'),
+      password: z.string().min(8, 'Password must be at least 8 characters')
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain uppercase, lowercase, and number')
+    });
+    
+    const result = schema.safeParse(data);
+    if (!result.success) {
+      throw new ValidationError('Invalid user data', result.error.issues);
+    }
+  }
+  
+  private normalizeUserData(data: CreateUserRequest): CreateUserRequest {
+    return {
+      ...data,
+      email: data.email.toLowerCase().trim(),
+      name: data.name.trim(),
+    };
+  }
+  
+  private async validateBusinessRules(data: CreateUserRequest): Promise<void> {
+    // Check for existing user
+    const existingUser = await this.userRepository.findByEmail(data.email);
+    if (existingUser) {
+      throw new ConflictError('User already exists');
+    }
+    
+    // Check against blocklist
+    const isBlocked = await this.blocklistService.isEmailBlocked(data.email);
+    if (isBlocked) {
+      throw new ForbiddenError('Email is not allowed');
+    }
+  }
+}
+\`\`\`
+
+## Code Organization Principles
+
+### Clean Architecture Pattern
+Organize code in layers with clear dependencies:
+
+\`\`\`typescript
+// Good: Clean architecture with dependency inversion
+// Domain Layer - Business logic (no external dependencies)
+export class User {
+  constructor(
+    public readonly id: UserId,
+    public readonly email: Email,
+    public readonly name: string,
+    private password: HashedPassword
+  ) {}
+  
+  changePassword(newPassword: string, passwordHasher: PasswordHasher): void {
+    if (newPassword.length < 8) {
+      throw new DomainError('Password must be at least 8 characters');
+    }
+    
+    this.password = passwordHasher.hash(newPassword);
+  }
+  
+  isPasswordValid(password: string, passwordHasher: PasswordHasher): boolean {
+    return passwordHasher.verify(password, this.password);
+  }
+}
+
+// Application Layer - Use cases
+export class CreateUserUseCase {
+  constructor(
+    private userRepository: UserRepository,
+    private passwordHasher: PasswordHasher,
+    private emailService: EmailService
+  ) {}
+  
+  async execute(request: CreateUserRequest): Promise<User> {
+    // Validate input
+    if (!request.email || !request.password) {
+      throw new ValidationError('Email and password are required');
+    }
+    
+    // Check if user exists
+    const existingUser = await this.userRepository.findByEmail(request.email);
+    if (existingUser) {
+      throw new ConflictError('User already exists');
+    }
+    
+    // Create user
+    const userId = UserId.generate();
+    const user = new User(
+      userId,
+      new Email(request.email),
+      request.name,
+      this.passwordHasher.hash(request.password)
+    );
+    
+    // Save user
+    await this.userRepository.save(user);
+    
+    // Send welcome email
+    await this.emailService.sendWelcomeEmail(user.email.value);
+    
+    return user;
+  }
+}
+
+// Infrastructure Layer - External concerns
+export class PostgresUserRepository implements UserRepository {
+  constructor(private database: Database) {}
+  
+  async save(user: User): Promise<void> {
+    await this.database.query(
+      'INSERT INTO users (id, email, name, password) VALUES ($1, $2, $3, $4)',
+      [user.id.value, user.email.value, user.name, user.password.value]
+    );
+  }
+  
+  async findByEmail(email: string): Promise<User | null> {
+    const result = await this.database.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
+    
+    return result.rows[0] ? this.mapToUser(result.rows[0]) : null;
+  }
+}
+\`\`\`
+
+### Function Design Excellence
+Write functions that are pure, testable, and focused:
+
+\`\`\`typescript
+// Good: Pure functions with single responsibility
+type ValidationRule<T> = (value: T) => string | null;
+
+const createEmailValidator = (): ValidationRule<string> => (email: string) => {
+  if (!email) return 'Email is required';
+  if (!email.includes('@')) return 'Email must contain @';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Invalid email format';
+  return null;
+};
+
+const createPasswordValidator = (minLength: number = 8): ValidationRule<string> => (password: string) => {
+  if (!password) return 'Password is required';
+  if (password.length < minLength) return \`Password must be at least \${minLength} characters\`;
+  if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+    return 'Password must contain uppercase, lowercase, and number';
+  }
+  return null;
+};
+
+// Good: Composition over inheritance
+const validateUser = (user: UserInput): ValidationResult => {
+  const emailError = createEmailValidator()(user.email);
+  const passwordError = createPasswordValidator()(user.password);
+  
+  const errors = [emailError, passwordError].filter(Boolean);
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+// Good: Immutable data transformations
+const normalizeUser = (user: UserInput): NormalizedUser => ({
+  ...user,
+  email: user.email.toLowerCase().trim(),
+  name: user.name.trim(),
+  createdAt: new Date().toISOString()
+});
+
+// Good: Error handling with Result pattern
+type Result<T, E = Error> = 
+  | { success: true; data: T }
+  | { success: false; error: E };
+
+const parseUser = (input: unknown): Result<User> => {
+  try {
+    const parsed = userSchema.parse(input);
+    return { success: true, data: parsed };
+  } catch (error) {
+    return { success: false, error: error as Error };
+  }
+};
+
+// Usage
+const result = parseUser(userInput);
+if (result.success) {
+  console.log('User:', result.data);
+} else {
+  console.error('Validation failed:', result.error.message);
+}
+\`\`\`
+
+## Performance and Security
+
+### Memory Management and Performance
+Write efficient code that scales:
+
+\`\`\`typescript
+// Good: Efficient data processing with streaming
+import { Transform } from 'stream';
+
+class UserProcessor extends Transform {
+  constructor(private batchSize: number = 100) {
+    super({ objectMode: true });
+    this.batch = [];
+  }
+  
+  private batch: User[] = [];
+  
+  _transform(user: User, encoding: string, callback: Function) {
+    this.batch.push(user);
+    
+    if (this.batch.length >= this.batchSize) {
+      this.processBatch()
+        .then(() => callback())
+        .catch(callback);
+    } else {
+      callback();
+    }
+  }
+  
+  _flush(callback: Function) {
+    if (this.batch.length > 0) {
+      this.processBatch()
+        .then(() => callback())
+        .catch(callback);
+    } else {
+      callback();
+    }
+  }
+  
+  private async processBatch(): Promise<void> {
+    await this.userService.processBatch(this.batch);
+    this.batch = [];
+  }
+}
+
+// Good: Memoization for expensive computations
+const memoize = <T extends (...args: any[]) => any>(fn: T): T => {
+  const cache = new Map();
+  
+  return ((...args: any[]) => {
+    const key = JSON.stringify(args);
+    
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    
+    const result = fn(...args);
+    cache.set(key, result);
+    
+    return result;
+  }) as T;
+};
+
+const expensiveCalculation = memoize((data: ComplexData): ProcessedData => {
+  // Heavy computation here
+  return processComplexData(data);
+});
+\`\`\`
+
+### Security Best Practices
+Build secure applications from the ground up:
+
+\`\`\`typescript
+// Good: Secure input handling
+import { escape } from 'html-escaper';
+import DOMPurify from 'dompurify';
+
+class SecureUserService {
+  async updateUserProfile(userId: string, updates: UserProfileUpdate): Promise<User> {
+    // Validate authorization
+    await this.authService.requireUserAccess(userId);
+    
+    // Sanitize inputs
+    const sanitizedUpdates = this.sanitizeUserInput(updates);
+    
+    // Validate business rules
+    await this.validateProfileUpdates(userId, sanitizedUpdates);
+    
+    // Update with audit trail
+    const updatedUser = await this.userRepository.updateWithAudit(
+      userId,
+      sanitizedUpdates,
+      { updatedBy: userId, timestamp: new Date() }
+    );
+    
+    this.logger.info('User profile updated', {
+      userId,
+      updatedFields: Object.keys(sanitizedUpdates),
+      timestamp: new Date().toISOString()
+    });
+    
+    return updatedUser;
+  }
+  
+  private sanitizeUserInput(input: UserProfileUpdate): UserProfileUpdate {
+    return {
+      name: input.name ? escape(input.name.trim()) : undefined,
+      bio: input.bio ? DOMPurify.sanitize(input.bio) : undefined,
+      website: input.website ? this.validateAndSanitizeUrl(input.website) : undefined,
+    };
+  }
+  
+  private validateAndSanitizeUrl(url: string): string {
+    try {
+      const parsed = new URL(url);
+      
+      // Only allow http/https protocols
+      if (!['http:', 'https:'].includes(parsed.protocol)) {
+        throw new ValidationError('Invalid URL protocol');
+      }
+      
+      return parsed.toString();
+    } catch {
+      throw new ValidationError('Invalid URL format');
+    }
+  }
+  
+  // Rate limiting decorator
+  @RateLimit({ requests: 10, per: 'minute' })
+  async sensitiveOperation(userId: string): Promise<void> {
+    // Implementation
+  }
+}
+\`\`\`
+
+## Quality Assurance Integration
+
+### Static Analysis Configuration
+Set up comprehensive linting and type checking:
+
+${hasLinting ? `\`\`\`json
+// .eslintrc.js - Comprehensive rules for quality
+{
+  "extends": [
+    ${hasTypeScript ? '"@typescript-eslint/recommended",' : ''}
+    ${hasTypeScript ? '"@typescript-eslint/recommended-requiring-type-checking",' : ''}
+    ${hasReact ? '"plugin:react/recommended",' : ''}
+    ${hasReact ? '"plugin:react-hooks/recommended",' : ''}
+    "plugin:security/recommended"
+  ],
+  "rules": {
+    // Code Quality
+    ${hasTypeScript ? '"@typescript-eslint/no-explicit-any": "error",' : ''}
+    ${hasTypeScript ? '"@typescript-eslint/no-unused-vars": "error",' : ''}
+    ${hasTypeScript ? '"@typescript-eslint/prefer-as-const": "error",' : ''}
+    ${hasTypeScript ? '"@typescript-eslint/prefer-nullish-coalescing": "error",' : ''}
+    ${hasTypeScript ? '"@typescript-eslint/prefer-optional-chain": "error",' : ''}
+    ${hasTypeScript ? '"@typescript-eslint/strict-boolean-expressions": "error",' : ''}
+    ${hasTypeScript ? '"@typescript-eslint/switch-exhaustiveness-check": "error",' : ''}
+    
+    // Security
+    "security/detect-object-injection": "error",
+    "security/detect-non-literal-regexp": "error",
+    "security/detect-unsafe-regex": "error",
+    
+    // Performance
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "prefer-const": "error",
+    
+    // Maintainability
+    "max-complexity": ["error", 10],
+    "max-depth": ["error", 4],
+    "max-lines-per-function": ["error", 50],
+    "no-magic-numbers": ["error", { "ignore": [0, 1, -1] }]
+  }
+}
+\`\`\`` : ''}
+
+### Documentation Standards
+Document code for maintainability:
+
+\`\`\`typescript
+/**
+ * Processes user payment with comprehensive validation and error handling.
+ * 
+ * @param userId - The unique identifier for the user
+ * @param paymentData - Payment information including amount, method, and currency
+ * @param options - Additional processing options
+ * @returns Promise resolving to payment result with transaction ID
+ * 
+ * @throws {ValidationError} When payment data is invalid
+ * @throws {InsufficientFundsError} When user has insufficient balance
+ * @throws {PaymentProcessingError} When external payment service fails
+ * 
+ * @example
+ * \`\`\`typescript
+ * const result = await processPayment('user-123', {
+ *   amount: 29.99,
+ *   currency: 'USD',
+ *   method: 'credit_card',
+ *   source: 'card_token_abc123'
+ * });
+ * 
+ * console.log('Payment processed:', result.transactionId);
+ * \`\`\`
+ */
+async function processPayment(
+  userId: string,
+  paymentData: PaymentRequest,
+  options: PaymentOptions = {}
+): Promise<PaymentResult> {
+  // Implementation with clear error handling
+}
+\`\`\`
+
+${hasTesting ? `### Test Coverage Requirements
+Maintain high test coverage with meaningful tests:
+
+\`\`\`typescript
+// Good: Comprehensive test coverage
+describe('UserService', () => {
+  describe('createUser', () => {
+    it('should create user with valid data', async () => {
+      // Arrange
+      const userData = createValidUserData();
+      const mockUser = { id: 'user-123', ...userData };
+      mockUserRepository.save.mockResolvedValue(mockUser);
+      
+      // Act
+      const result = await userService.createUser(userData);
+      
+      // Assert
+      expect(result).toEqual(mockUser);
+      expect(mockUserRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: userData.email.toLowerCase(),
+          name: userData.name.trim()
+        })
+      );
+    });
+    
+    it('should throw ConflictError for duplicate email', async () => {
+      // Arrange
+      const userData = createValidUserData();
+      mockUserRepository.findByEmail.mockResolvedValue(existingUser);
+      
+      // Act & Assert
+      await expect(userService.createUser(userData))
+        .rejects.toThrow(ConflictError);
+    });
+    
+    it('should handle database errors gracefully', async () => {
+      // Test error scenarios
+    });
+  });
+});
+\`\`\`` : ''}
+
+## Applied Quality Rules
+Based on your project configuration:
+
 ${formData.codeQuality.map(rule => `- ${rule}`).join('\n')}
 
-## Documentation Requirements
-- Level: ${formData.documentationLevel}
+### Documentation Level: ${formData.documentationLevel}
 - Comment Styles: ${formData.commentStyle.join(', ')}
 - README Requirements: ${formData.readmeRequirements.join(', ')}
 
-## Best Practices
-- Write self-documenting code
-- Follow consistent naming conventions
-- Implement proper error handling
-- Maintain test coverage
-- Use proper type safety
+## Quality Metrics and Monitoring
 
-## Code Examples:
+Track code quality metrics continuously:
 
 \`\`\`typescript
-// Good: Following quality standards
-interface UserData {
-  id: string;
-  name: string;
-  email: string;
+// Good: Quality metrics collection
+interface QualityMetrics {
+  codeComplexity: number;
+  testCoverage: number;
+  duplicationPercentage: number;
+  technicalDebtHours: number;
+  securityVulnerabilities: number;
 }
 
-${formData.codeQuality.includes('No `any` types allowed') ? `
-// Good: Proper typing
-function processUser(user: UserData): ProcessedUser {
-  return {
-    ...user,
-    displayName: user.name.trim()
-  };
-}
-
-// Bad: Using any
-function badProcessUser(user: any): any {
-  return user;
-}
-` : ''}
-
-${formData.codeQuality.includes('Enforce error boundaries') ? `
-// Good: Error boundary implementation
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
+class QualityMonitor {
+  async generateReport(): Promise<QualityReport> {
+    const metrics = await this.collectMetrics();
+    
+    return {
+      timestamp: new Date().toISOString(),
+      metrics,
+      recommendations: this.generateRecommendations(metrics),
+      trends: await this.calculateTrends(metrics)
+    };
   }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
+  
+  private generateRecommendations(metrics: QualityMetrics): string[] {
+    const recommendations: string[] = [];
+    
+    if (metrics.codeComplexity > 10) {
+      recommendations.push('Reduce code complexity by extracting functions');
+    }
+    
+    if (metrics.testCoverage < 80) {
+      recommendations.push('Increase test coverage to at least 80%');
+    }
+    
+    if (metrics.duplicationPercentage > 5) {
+      recommendations.push('Refactor duplicate code into reusable functions');
+    }
+    
+    return recommendations;
   }
 }
-` : ''}
-\`\`\``;
+\`\`\`
+
+Remember: Code quality is not just about following rules—it's about creating maintainable, secure, and performant software that serves users reliably.`;
 }

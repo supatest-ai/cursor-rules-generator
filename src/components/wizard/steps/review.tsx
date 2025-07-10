@@ -1,20 +1,15 @@
 import { useWizard } from "../wizard-provider";
 import WizardStep from "../wizard-step";
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle, Wand2 } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 export default function Review() {
   const { formData, generateRules, isGenerating } = useWizard();
 
-  const handleGenerate = () => {
-    generateRules();
-  };
-
   return (
     <WizardStep
       stepNumber={6}
-      onNext={handleGenerate}
+      onNext={generateRules}
       nextDisabled={isGenerating}
       nextLabel={isGenerating ? "Generating..." : "Generate Rules"}
     >
@@ -54,32 +49,15 @@ export default function Review() {
         </div>
       </div>
 
-      <Alert className="mb-6">
+      <Alert>
         <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
           <p className="font-medium text-amber-800">Ready to Generate</p>
           <p className="text-amber-700 mt-1">
-            This will create {2 + formData.taskTypes.length + 2} cursor rule files optimized for your project configuration.
+            This will create {2 + formData.taskTypes.length + 2} cursor rule files optimized for your project configuration. Use the "Generate Rules" button below to proceed.
           </p>
         </AlertDescription>
       </Alert>
-
-      {!isGenerating && (
-        <Button
-          onClick={handleGenerate}
-          className="w-full gradient-bg text-white hover:opacity-90 flex items-center justify-center space-x-2"
-        >
-          <Wand2 className="w-5 h-5" />
-          <span>Generate Cursor Rules</span>
-        </Button>
-      )}
-
-      {isGenerating && (
-        <div className="flex items-center justify-center space-x-2 text-purple-600">
-          <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-600 border-t-transparent"></div>
-          <span>Generating your custom rules...</span>
-        </div>
-      )}
     </WizardStep>
   );
 }

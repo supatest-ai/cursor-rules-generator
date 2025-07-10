@@ -25,7 +25,7 @@ export default function Home() {
             <div className="lg:col-span-2">
               <div className="bg-white rounded-xl shadow-lg">
                 <ProgressBar />
-                
+
                 <TechStackSelection />
                 <ProjectStructure />
                 <CodeStyle />

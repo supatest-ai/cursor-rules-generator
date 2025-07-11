@@ -1,70 +1,99 @@
 import { WizardFormData } from "@/types/wizard";
-import { STATIC_RULES, FRAMEWORK_TEMPLATES, TASK_TEMPLATES } from "./rule-templates";
+import {
+  getStaticRules,
+  getFrameworkTemplates,
+  getTaskTemplates,
+  getTechnologies,
+  getFrameworksForTechnology,
+  getAllRules
+} from "./rule-templates";
 
-export function generateRules(formData: WizardFormData) {
+export async function generateRules(formData: WizardFormData) {
   const rules = [];
 
-  // Add static rules (always included)
-  Object.entries(STATIC_RULES).forEach(([filename, content]) => {
-    rules.push({
-      filename,
-      content,
-      isStatic: true
-    });
-  });
-
-  // Add framework-specific rules
-  const frameworkRules = FRAMEWORK_TEMPLATES[formData.framework as keyof typeof FRAMEWORK_TEMPLATES];
-  if (frameworkRules) {
-    Object.entries(frameworkRules).forEach(([filename, content]) => {
+  try {
+    // Add static rules (always included)
+    const staticRules = await getStaticRules();
+    Object.entries(staticRules).forEach(([ruleId, content]) => {
       rules.push({
-        filename,
+        filename: `${ruleId}.mdc`,
         content,
+        isStatic: true
+      });
+    });
+
+    // Add framework-specific rules
+    const frameworkTemplates = await getFrameworkTemplates();
+    const frameworkRules = frameworkTemplates[formData.framework as keyof typeof frameworkTemplates];
+    if (frameworkRules) {
+      Object.entries(frameworkRules).forEach(([ruleId, content]) => {
+        rules.push({
+          filename: `${ruleId}.mdc`,
+          content,
+          isStatic: false
+        });
+      });
+    }
+
+    // Add task-specific rules
+    const taskTemplates = await getTaskTemplates();
+
+    if (formData.taskTypes.includes('features') && taskTemplates.features) {
+      rules.push({
+        filename: "feature-development.mdc",
+        content: taskTemplates.features,
         isStatic: false
       });
+    }
+
+    if (formData.taskTypes.includes('bugs') && taskTemplates.bugs) {
+      rules.push({
+        filename: "bug-fixing.mdc",
+        content: taskTemplates.bugs,
+        isStatic: false
+      });
+    }
+
+    if (formData.taskTypes.includes('testing') && taskTemplates.testing) {
+      rules.push({
+        filename: "testing-guidelines.mdc",
+        content: taskTemplates.testing,
+        isStatic: false
+      });
+    }
+  } catch (error) {
+    console.error('Error loading dynamic rules:', error);
+    // Add fallback message if dynamic loading fails
+    rules.push({
+      filename: "error.mdc",
+      content: `---
+description: Error loading rules
+---
+# Error Loading Rules
+
+There was an error loading the dynamic rule content. Please check that all rule files are properly configured.
+
+Error: ${error instanceof Error ? error.message : 'Unknown error'}
+`,
+      isStatic: false
     });
   }
 
-  // Add project structure rule
+  // Add project structure rule (generated dynamically)
   rules.push({
     filename: "project-structure.mdc",
     content: generateProjectStructureRule(formData),
     isStatic: false
   });
 
-  // Add development workflow rule
+  // Add development workflow rule (generated dynamically)
   rules.push({
     filename: "development-workflow.mdc",
     content: generateDevelopmentWorkflowRule(formData),
     isStatic: false
   });
 
-  // Add task-specific rules
-  if (formData.taskTypes.includes('features')) {
-    rules.push({
-      filename: "feature-development.mdc",
-      content: TASK_TEMPLATES.features,
-      isStatic: false
-    });
-  }
-
-  if (formData.taskTypes.includes('bugs')) {
-    rules.push({
-      filename: "bug-fixing.mdc",
-      content: TASK_TEMPLATES.bugs,
-      isStatic: false
-    });
-  }
-
-  if (formData.taskTypes.includes('testing')) {
-    rules.push({
-      filename: "testing-guidelines.mdc",
-      content: TASK_TEMPLATES.testing,
-      isStatic: false
-    });
-  }
-
-  // Add code quality rule
+  // Add code quality rule (generated dynamically)
   rules.push({
     filename: "code-quality.mdc",
     content: generateCodeQualityRule(formData),
@@ -72,6 +101,49 @@ export function generateRules(formData: WizardFormData) {
   });
 
   return rules;
+}
+
+// Export the async version as the main function
+export { generateRules as default };
+
+// Keep the sync version for backward compatibility during transition
+export function generateRulesSync(formData: WizardFormData) {
+  console.warn('generateRulesSync is deprecated. Use the async generateRules function instead.');
+
+  const rules = [];
+
+  // Add project structure rule (generated dynamically)
+  rules.push({
+    filename: "project-structure.mdc",
+    content: generateProjectStructureRule(formData),
+    isStatic: false
+  });
+
+  // Add development workflow rule (generated dynamically)
+  rules.push({
+    filename: "development-workflow.mdc",
+    content: generateDevelopmentWorkflowRule(formData),
+    isStatic: false
+  });
+
+  // Add code quality rule (generated dynamically)
+  rules.push({
+    filename: "code-quality.mdc",
+    content: generateCodeQualityRule(formData),
+    isStatic: false
+  });
+
+  return rules;
+}
+
+// Helper function to get available technologies
+export function getAvailableTechnologies() {
+  return getTechnologies();
+}
+
+// Helper function to get frameworks for a technology
+export function getAvailableFrameworks(technologyId: string) {
+  return getFrameworksForTechnology(technologyId);
 }
 
 function generateDevelopmentWorkflowRule(formData: WizardFormData): string {

@@ -49,7 +49,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
-      const rules = generateRules(formData);
+      const rules = await generateRules(formData);
       setGeneratedRules(rules);
     } catch (error) {
       console.error("Failed to generate rules:", error);

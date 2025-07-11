@@ -1,0 +1,171 @@
+---
+description: Gin framework development best practices
+globs: "**/*.go"
+alwaysApply: false
+---
+# Gin Framework Development Guidelines
+
+## Router Setup and Middleware
+- Use middleware for cross-cutting concerns
+- Implement proper request validation
+- Add structured logging and request tracing
+- Use context for request-scoped data
+
+## API Development
+- Follow RESTful conventions
+- Implement consistent error responses
+- Use JSON binding for request parsing
+- Add proper CORS configuration
+
+## Code Examples:
+
+```go
+// Good: Gin application setup with middleware
+package main
+
+import (
+    "context"
+    "log/slog"
+    "net/http"
+    "time"
+    
+    "github.com/gin-gonic/gin"
+    "github.com/go-playground/validator/v10"
+)
+
+type Application struct {
+    router  *gin.Engine
+    userSvc UserService
+    logger  *slog.Logger
+}
+
+func NewApplication(userSvc UserService, logger *slog.Logger) *Application {
+    app := &Application{
+        userSvc: userSvc,
+        logger:  logger,
+    }
+    
+    app.setupRouter()
+    return app
+}
+
+func (a *Application) setupRouter() {
+    gin.SetMode(gin.ReleaseMode)
+    a.router = gin.New()
+    
+    // Middleware
+    a.router.Use(a.loggingMiddleware())
+    a.router.Use(a.recoveryMiddleware())
+    a.router.Use(a.corsMiddleware())
+    a.router.Use(a.requestIDMiddleware())
+    
+    // Routes
+    api := a.router.Group("/api/v1")
+    {
+        users := api.Group("/users")
+        {
+            users.POST("", a.createUser)
+            users.GET("/:id", a.getUser)
+            users.PUT("/:id", a.updateUser)
+            users.DELETE("/:id", a.deleteUser)
+        }
+    }
+    
+    // Health check
+    a.router.GET("/health", a.healthCheck)
+}
+
+// Good: Request/Response structs with validation
+type CreateUserRequest struct {
+    Email    string `json:"email" binding:"required,email"`
+    Name     string `json:"name" binding:"required,min=2,max=100"`
+    Password string `json:"password" binding:"required,min=8"`
+}
+
+type UserResponse struct {
+    ID        string    `json:"id"`
+    Email     string    `json:"email"`
+    Name      string    `json:"name"`
+    CreatedAt time.Time `json:"created_at"`
+}
+
+type ErrorResponse struct {
+    Error   string            `json:"error"`
+    Code    string            `json:"code,omitempty"`
+    Details map[string]string `json:"details,omitempty"`
+}
+
+// Good: Handler with proper error handling
+func (a *Application) createUser(c *gin.Context) {
+    var req CreateUserRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        a.handleValidationError(c, err)
+        return
+    }
+    
+    ctx := c.Request.Context()
+    user, err := a.userSvc.CreateUser(ctx, req)
+    if err != nil {
+        a.handleServiceError(c, err)
+        return
+    }
+    
+    response := UserResponse{
+        ID:        user.ID.String(),
+        Email:     user.Email,
+        Name:      user.Name,
+        CreatedAt: user.CreatedAt,
+    }
+    
+    c.JSON(http.StatusCreated, response)
+}
+
+// Good: Error handling
+func (a *Application) handleServiceError(c *gin.Context, err error) {
+    switch {
+    case errors.Is(err, ErrUserNotFound):
+        c.JSON(http.StatusNotFound, ErrorResponse{
+            Error: "User not found",
+            Code:  "USER_NOT_FOUND",
+        })
+    case errors.Is(err, ErrUserAlreadyExists):
+        c.JSON(http.StatusConflict, ErrorResponse{
+            Error: "User already exists",
+            Code:  "USER_EXISTS",
+        })
+    case errors.Is(err, context.DeadlineExceeded):
+        c.JSON(http.StatusRequestTimeout, ErrorResponse{
+            Error: "Request timeout",
+            Code:  "TIMEOUT",
+        })
+    default:
+        a.logger.Error("unexpected service error", "error", err)
+        c.JSON(http.StatusInternalServerError, ErrorResponse{
+            Error: "Internal server error",
+            Code:  "INTERNAL_ERROR",
+        })
+    }
+}
+
+func (a *Application) handleValidationError(c *gin.Context, err error) {
+    var validationErrors validator.ValidationErrors
+    if errors.As(err, &validationErrors) {
+        details := make(map[string]string)
+        for _, fieldError := range validationErrors {
+            details[fieldError.Field()] = getValidationErrorMessage(fieldError)
+        }
+        
+        c.JSON(http.StatusBadRequest, ErrorResponse{
+            Error:   "Validation failed",
+            Code:    "VALIDATION_ERROR",
+            Details: details,
+        })
+        return
+    }
+    
+    c.JSON(http.StatusBadRequest, ErrorResponse{
+        Error: "Invalid request format",
+        Code:  "INVALID_REQUEST",
+    })
+}
+```

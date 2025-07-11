@@ -16,6 +16,8 @@ import {
   SiTypescript,
   SiJavascript,
   SiPython,
+  SiGo,
+  SiSpring,
   SiGraphql,
   SiMongodb,
   SiPostgresql,
@@ -68,6 +70,13 @@ import {
   SiYarn
 } from "react-icons/si";
 
+// Custom icon component for Java
+const JavaIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} rounded bg-red-600 text-white flex items-center justify-center text-xs font-bold`}>
+    J
+  </div>
+);
+
 interface Technology {
   id: string;
   label: string;
@@ -79,6 +88,8 @@ const technologies: Record<string, Technology[]> = {
   "Languages & Runtimes": [
     { id: "typescript", label: "TypeScript", icon: SiTypescript, color: "text-blue-600" },
     { id: "javascript", label: "JavaScript", icon: SiJavascript, color: "text-yellow-500" },
+    { id: "java", label: "Java", icon: JavaIcon, color: "text-red-600" },
+    { id: "golang", label: "Go", icon: SiGo, color: "text-cyan-500" },
     { id: "python", label: "Python", icon: SiPython, color: "text-blue-500" },
     { id: "nodejs", label: "Node.js", icon: SiNodedotjs, color: "text-green-600" },
     { id: "deno", label: "Deno", icon: SiDeno, color: "text-black dark:text-white" },
@@ -105,6 +116,14 @@ const technologies: Record<string, Technology[]> = {
     { id: "express", label: "Express.js", icon: SiExpress, color: "text-gray-700" },
     { id: "fastify", label: "Fastify", icon: SiFastify, color: "text-black" },
     { id: "nestjs", label: "NestJS", icon: SiNestjs, color: "text-red-500" },
+    { id: "spring-boot", label: "Spring Boot", icon: SiSpring, color: "text-green-600" },
+    { id: "quarkus", label: "Quarkus", icon: JavaIcon, color: "text-blue-700" },
+    { id: "micronaut", label: "Micronaut", icon: JavaIcon, color: "text-orange-600" },
+    { id: "dropwizard", label: "Dropwizard", icon: JavaIcon, color: "text-purple-600" },
+    { id: "gin", label: "Gin", icon: SiGo, color: "text-cyan-500" },
+    { id: "echo", label: "Echo", icon: SiGo, color: "text-blue-500" },
+    { id: "fiber", label: "Fiber", icon: SiGo, color: "text-gray-700" },
+    { id: "gorilla-mux", label: "Gorilla Mux", icon: SiGo, color: "text-orange-500" },
   ],
 
   "Styling & UI": [
@@ -204,6 +223,12 @@ const presets = {
   "Vue.js Ecosystem": [
     "typescript", "vue", "nodejs", "vite", "tailwind", "postgresql", "drizzle",
     "vitest", "biome", "netlify", "pnpm"
+  ],
+  "Enterprise Java": [
+    "java", "spring-boot", "postgresql", "docker", "aws"
+  ],
+  "Go Microservices": [
+    "golang", "gin", "postgresql", "redis", "docker", "aws"
   ],
   "Enterprise Monorepo": [
     "typescript", "react", "nextjs", "mui", "nestjs", "postgresql",

@@ -1,0 +1,87 @@
+---
+description: Spring Boot development best practices based on official documentation
+globs: "**/*.java"
+alwaysApply: false
+---
+# Spring Boot Development Excellence
+
+## Project Structure and Configuration
+- Follow Spring Boot's convention over configuration
+- Use application.yml instead of application.properties for better readability
+- Implement proper profiles for different environments
+- Use @ConfigurationProperties for type-safe configuration
+
+## Dependency Injection Best Practices
+- Prefer constructor injection over field injection
+- Use @RequiredArgsConstructor with Lombok
+- Avoid circular dependencies
+- Use interfaces for service abstractions
+
+## REST API Development
+- Use proper HTTP status codes and response entities
+- Implement global exception handling with @ControllerAdvice
+- Add validation with Bean Validation API
+- Use DTOs for request/response objects
+
+## Code Examples:
+
+```java
+// Good: REST Controller with proper error handling
+@RestController
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
+@Validated
+public class UserController {
+    private final UserService userService;
+    
+    @PostMapping
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
+        var user = userService.createUser(request);
+        var response = UserResponse.from(user);
+        
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .location(URI.create("/api/users/" + user.getId()))
+            .body(response);
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUser(@PathVariable UUID id) {
+        return userService.findById(id)
+            .map(UserResponse::from)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+}
+
+// Good: Service layer with proper transaction management
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class UserService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    
+    @Transactional
+    public User createUser(CreateUserRequest request) {
+        if (userRepository.existsByEmail(request.email())) {
+            throw new UserAlreadyExistsException("User already exists with email: " + request.email());
+        }
+        
+        var user = User.builder()
+            .email(request.email().toLowerCase())
+            .name(request.name().trim())
+            .password(passwordEncoder.encode(request.password()))
+            .status(UserStatus.ACTIVE)
+            .build();
+            
+        var savedUser = userRepository.save(user);
+        
+        // Send welcome email asynchronously
+        emailService.sendWelcomeEmailAsync(savedUser.getEmail());
+        
+        return savedUser;
+         }
+ }
+ ```

@@ -1,0 +1,34 @@
+---
+description: Continuous Rule Improvement and Pattern Recognition
+globs: 
+alwaysApply: true
+---
+# Rule Improvement Triggers
+
+Continuously monitor and improve rules based on:
+
+## Code Pattern Analysis
+- **Repeated Implementation Patterns**: When the same solution appears 3+ times across files
+- **Common Error Patterns**: Bugs that could be prevented by better rules  
+- **Performance Anti-patterns**: Inefficient code that rule guidance could prevent
+- **Security Vulnerabilities**: Patterns that create security risks
+
+## Technology Evolution Monitoring
+- **New Language Features**: TypeScript updates, React patterns, modern APIs
+- **Framework Best Practices**: Updated recommendations from official docs
+- **Ecosystem Changes**: New tools, linting rules, testing approaches
+- **Industry Standards**: Emerging patterns from leading tech companies
+
+## Continuous Improvement Process
+
+### Monthly Review Cycle
+1. **Pattern Mining**: Analyze recent code changes for emerging patterns
+2. **Issue Correlation**: Link production issues to missing rule coverage  
+3. **Developer Feedback**: Collect input on rule effectiveness and gaps
+4. **External Research**: Review latest best practices and documentation
+
+### Knowledge Sources
+- **Official Documentation**: Framework and language specifications
+- **Industry Leaders**: Google, Facebook, Microsoft engineering blogs
+- **Static Analysis**: ESLint, SonarQube, CodeClimate reports
+- **Performance Monitoring**: Real application metrics and bottlenecks

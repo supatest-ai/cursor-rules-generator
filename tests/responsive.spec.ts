@@ -33,10 +33,7 @@ test.describe('Responsive Design', () => {
       await expect(page.locator('text=Generated Rules')).toBeVisible();
 
       // Take screenshot
-      await page.screenshot({
-        path: `responsive-${viewport.name}-${viewport.width}x${viewport.height}.png`,
-        fullPage: true
-      });
+      await page.screenshot({ fullPage: true });
     });
   }
 
@@ -56,7 +53,7 @@ test.describe('Responsive Design', () => {
     await page.click('text=Next Step');
     await expect(page.locator('text=Step 2 of 6')).toBeVisible();
 
-    await page.screenshot({ path: 'mobile-navigation-test.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should handle tablet layout correctly', async ({ page }) => {
@@ -74,7 +71,7 @@ test.describe('Responsive Design', () => {
     await expect(page.locator('text=Languages & Runtimes')).toBeVisible();
     await expect(page.locator('text=Frontend Frameworks')).toBeVisible();
 
-    await page.screenshot({ path: 'tablet-layout-test.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should maintain functionality across viewport changes', async ({ page }) => {
@@ -102,7 +99,7 @@ test.describe('Responsive Design', () => {
     await page.click('text=Next Step');
     await expect(page.locator('text=Step 2 of 6')).toBeVisible();
 
-    await page.screenshot({ path: 'viewport-change-functionality.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should handle modal display on different screen sizes', async ({ page }) => {
@@ -115,7 +112,7 @@ test.describe('Responsive Design', () => {
     await page.click('text=Next Step');
     await page.click('text=Next Step');
     await page.click('text=Next Step');
-    await page.click('text=Generate Rules');
+    await page.click('button:has-text("Generate Rules")');
     await page.waitForTimeout(2000);
 
     // Test modal on different screen sizes
@@ -130,10 +127,7 @@ test.describe('Responsive Design', () => {
       await expect(page.locator('text=Generated Rules Preview')).toBeVisible();
 
       // Take screenshot
-      await page.screenshot({
-        path: `modal-${viewport.name}-${viewport.width}x${viewport.height}.png`,
-        fullPage: true
-      });
+      await page.screenshot({ fullPage: true });
 
       // Close modal
       await page.press('body', 'Escape');
@@ -155,7 +149,7 @@ test.describe('Responsive Design', () => {
       await expect(page.locator('text=Next Step')).toBeVisible();
       await expect(page.locator('text=Clear all')).toBeVisible();
 
-      await page.screenshot({ path: `text-readability-${viewport.name}.png`, fullPage: true });
+      await page.screenshot({ fullPage: true });
     }
   });
 
@@ -177,7 +171,7 @@ test.describe('Responsive Design', () => {
     await page.fill('input[id="sourceDirectory"]', 'mobile-app/');
     await expect(page.locator('input[id="sourceDirectory"]')).toHaveValue('mobile-app/');
 
-    await page.screenshot({ path: 'touch-device-forms.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should maintain layout integrity during orientation changes', async ({ page }) => {
@@ -190,7 +184,7 @@ test.describe('Responsive Design', () => {
     await page.click('text=React');
 
     // Take portrait screenshot
-    await page.screenshot({ path: 'tablet-portrait-layout.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
 
     // Switch to landscape
     await page.setViewportSize({ width: 1024, height: 768 });
@@ -201,7 +195,7 @@ test.describe('Responsive Design', () => {
     await expect(page.getByRole('checkbox', { name: 'TypeScript', exact: true })).toBeChecked();
 
     // Take landscape screenshot
-    await page.screenshot({ path: 'tablet-landscape-layout.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should handle long content lists on small screens', async ({ page }) => {
@@ -220,6 +214,6 @@ test.describe('Responsive Design', () => {
     await page.evaluate(() => window.scrollTo(0, 1000));
     await expect(page.locator('label', { hasText: 'Testing' })).toBeVisible();
 
-    await page.screenshot({ path: 'small-screen-scrolling.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 }); 

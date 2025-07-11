@@ -14,7 +14,7 @@ test.describe('Tech Stack Selection', () => {
     await expect(page.locator('text=Enterprise Monorepo')).toBeVisible();
     
     // Take screenshot
-    await page.screenshot({ path: 'tech-stack-presets.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should select Modern Full-Stack preset correctly', async ({ page }) => {
@@ -27,7 +27,7 @@ test.describe('Tech Stack Selection', () => {
     await expect(page.getByRole('checkbox', { name: 'Next.js', exact: true })).toBeChecked();
     await expect(page.getByRole('checkbox', { name: 'Tailwind CSS', exact: true })).toBeChecked();
     
-    await page.screenshot({ path: 'modern-fullstack-selected.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should select MERN Stack preset correctly', async ({ page }) => {
@@ -40,7 +40,7 @@ test.describe('Tech Stack Selection', () => {
     await expect(page.getByRole('checkbox', { name: 'Express.js', exact: true })).toBeChecked();
     await expect(page.getByRole('checkbox', { name: 'MongoDB', exact: true })).toBeChecked();
     
-    await page.screenshot({ path: 'mern-stack-selected.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should select Vue.js Ecosystem preset correctly', async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe('Tech Stack Selection', () => {
     await expect(page.getByRole('checkbox', { name: 'Vue.js', exact: true })).toBeChecked();
     await expect(page.getByRole('checkbox', { name: 'Vite', exact: true })).toBeChecked();
     
-    await page.screenshot({ path: 'vue-ecosystem-selected.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should clear all selections when Clear all is clicked', async ({ page }) => {
@@ -68,7 +68,7 @@ test.describe('Tech Stack Selection', () => {
     await expect(page.getByRole('checkbox', { name: 'React', exact: true })).not.toBeChecked();
     await expect(page.getByRole('checkbox', { name: 'Next.js', exact: true })).not.toBeChecked();
     
-    await page.screenshot({ path: 'all-cleared.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should allow individual technology selection', async ({ page }) => {
@@ -88,7 +88,7 @@ test.describe('Tech Stack Selection', () => {
     await expect(page.getByRole('checkbox', { name: 'Jest', exact: true })).toBeChecked();
     await expect(page.getByRole('checkbox', { name: 'ESLint', exact: true })).toBeChecked();
     
-    await page.screenshot({ path: 'individual-selections.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should display technology categories correctly', async ({ page }) => {
@@ -103,7 +103,7 @@ test.describe('Tech Stack Selection', () => {
     await expect(page.locator('.space-y-6').locator('text=Testing').first()).toBeVisible();
     await expect(page.locator('text=Code Quality').first()).toBeVisible();
     
-    await page.screenshot({ path: 'tech-categories.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should proceed to next step with selections', async ({ page }) => {
@@ -119,6 +119,6 @@ test.describe('Tech Stack Selection', () => {
     await expect(page.locator('text=Project Structure')).toBeVisible();
     await expect(page.locator('text=Step 2 of 6')).toBeVisible();
     
-    await page.screenshot({ path: 'proceeded-to-step2.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 }); 

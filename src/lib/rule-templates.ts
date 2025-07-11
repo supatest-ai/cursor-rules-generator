@@ -17,19 +17,19 @@ export const FRAMEWORK_TEMPLATES: Record<string, Record<string, string>> = {};
 export const TASK_TEMPLATES: Record<string, string> = {};
 
 // Dynamic rule loading functions - no fallbacks
-export async function getStaticRules(): Promise<Record<string, string>> {
+export function getStaticRules(): Record<string, string> {
   const staticRules: Record<string, string> = {};
   const staticRuleMetadata = getRulesByCategory('static');
 
   for (const rule of staticRuleMetadata) {
-    const content = await loadRuleContent(rule.filePath);
+    const content = loadRuleContent(rule.id);
     staticRules[rule.id] = content;
   }
 
   return staticRules;
 }
 
-export async function getFrameworkTemplates(): Promise<Record<string, Record<string, string>>> {
+export function getFrameworkTemplates(): Record<string, Record<string, string>> {
   const frameworkTemplates: Record<string, Record<string, string>> = {};
 
   for (const technology of TECHNOLOGY_CONFIG) {
@@ -37,7 +37,7 @@ export async function getFrameworkTemplates(): Promise<Record<string, Record<str
 
     const techRules = getRulesByTechnology(technology.id);
     for (const rule of techRules) {
-      const content = await loadRuleContent(rule.filePath);
+      const content = loadRuleContent(rule.id);
       frameworkTemplates[technology.id][rule.id] = content;
     }
   }
@@ -45,12 +45,12 @@ export async function getFrameworkTemplates(): Promise<Record<string, Record<str
   return frameworkTemplates;
 }
 
-export async function getTaskTemplates(): Promise<Record<string, string>> {
+export function getTaskTemplates(): Record<string, string> {
   const taskTemplates: Record<string, string> = {};
   const taskRules = getRulesByCategory('task');
 
   for (const rule of taskRules) {
-    const content = await loadRuleContent(rule.filePath);
+    const content = loadRuleContent(rule.id);
     taskTemplates[rule.id] = content;
   }
 

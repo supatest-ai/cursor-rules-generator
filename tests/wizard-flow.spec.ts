@@ -59,7 +59,7 @@ test.describe('Wizard Flow Navigation', () => {
     await expect(page.locator('text=Step 6 of 6')).toBeVisible();
     await expect(page.locator('text=Review & Generate')).toBeVisible();
     
-    await page.screenshot({ path: 'wizard-complete-flow.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should navigate backwards through wizard steps', async ({ page }) => {
@@ -77,7 +77,7 @@ test.describe('Wizard Flow Navigation', () => {
     await page.click('text=Previous');
     await expect(page.locator('text=Step 1 of 6')).toBeVisible();
     
-    await page.screenshot({ path: 'wizard-backward-navigation.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should maintain form state during navigation', async ({ page }) => {
@@ -105,7 +105,7 @@ test.describe('Wizard Flow Navigation', () => {
     await expect(page.getByRole('checkbox', { name: 'TypeScript', exact: true })).toBeChecked();
     await expect(page.getByRole('checkbox', { name: 'React', exact: true })).toBeChecked();
     
-    await page.screenshot({ path: 'wizard-state-persistence.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should validate required fields', async ({ page }) => {
@@ -117,7 +117,7 @@ test.describe('Wizard Flow Navigation', () => {
     await page.click('text=Next Step');
     await expect(page.locator('text=Step 2 of 6')).toBeVisible();
     
-    await page.screenshot({ path: 'wizard-validation.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should display progress bar correctly', async ({ page }) => {
@@ -140,7 +140,7 @@ test.describe('Wizard Flow Navigation', () => {
     await page.click('text=Next Step');
     await expect(page.locator('text=Step 6 of 6')).toBeVisible();
     
-    await page.screenshot({ path: 'wizard-progress-tracking.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 
   test('should handle form interactions correctly', async ({ page }) => {
@@ -163,6 +163,6 @@ test.describe('Wizard Flow Navigation', () => {
     await expect(page.locator('input[value="type-based"]')).toBeChecked();
     await expect(page.locator('input[value="feature-based"]')).not.toBeChecked();
     
-    await page.screenshot({ path: 'wizard-form-interactions.png', fullPage: true });
+    await page.screenshot({ fullPage: true });
   });
 }); 

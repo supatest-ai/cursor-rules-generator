@@ -8,12 +8,12 @@ import {
   getAllRules
 } from "./rule-templates";
 
-export async function generateRules(formData: WizardFormData) {
+export function generateRules(formData: WizardFormData) {
   const rules = [];
 
   try {
     // Add static rules (always included)
-    const staticRules = await getStaticRules();
+    const staticRules = getStaticRules();
     Object.entries(staticRules).forEach(([ruleId, content]) => {
       rules.push({
         filename: `${ruleId}.mdc`,
@@ -22,11 +22,34 @@ export async function generateRules(formData: WizardFormData) {
       });
     });
 
-    // Add framework-specific rules
-    const frameworkTemplates = await getFrameworkTemplates();
-    const frameworkRules = frameworkTemplates[formData.framework as keyof typeof frameworkTemplates];
-    if (frameworkRules) {
-      Object.entries(frameworkRules).forEach(([ruleId, content]) => {
+    // Add framework-specific rules based on selected technologies
+    const frameworkTemplates = getFrameworkTemplates();
+
+    // Check for React
+    if (formData.additionalTech.includes('react') && frameworkTemplates.react) {
+      Object.entries(frameworkTemplates.react).forEach(([ruleId, content]) => {
+        rules.push({
+          filename: `${ruleId}.mdc`,
+          content,
+          isStatic: false
+        });
+      });
+    }
+
+    // Check for Java frameworks
+    if (formData.additionalTech.includes('spring-boot') && frameworkTemplates.java) {
+      Object.entries(frameworkTemplates.java).forEach(([ruleId, content]) => {
+        rules.push({
+          filename: `${ruleId}.mdc`,
+          content,
+          isStatic: false
+        });
+      });
+    }
+
+    // Check for Go frameworks
+    if (formData.additionalTech.includes('gin') && frameworkTemplates.golang) {
+      Object.entries(frameworkTemplates.golang).forEach(([ruleId, content]) => {
         rules.push({
           filename: `${ruleId}.mdc`,
           content,
@@ -36,7 +59,7 @@ export async function generateRules(formData: WizardFormData) {
     }
 
     // Add task-specific rules
-    const taskTemplates = await getTaskTemplates();
+    const taskTemplates = getTaskTemplates();
 
     if (formData.taskTypes.includes('features') && taskTemplates.features) {
       rules.push({
@@ -46,21 +69,6 @@ export async function generateRules(formData: WizardFormData) {
       });
     }
 
-    if (formData.taskTypes.includes('bugs') && taskTemplates.bugs) {
-      rules.push({
-        filename: "bug-fixing.mdc",
-        content: taskTemplates.bugs,
-        isStatic: false
-      });
-    }
-
-    if (formData.taskTypes.includes('testing') && taskTemplates.testing) {
-      rules.push({
-        filename: "testing-guidelines.mdc",
-        content: taskTemplates.testing,
-        isStatic: false
-      });
-    }
   } catch (error) {
     console.error('Error loading dynamic rules:', error);
     // Add fallback message if dynamic loading fails
@@ -326,7 +334,9 @@ ${formData.componentOrganization === 'feature-based' ? `
 
 function generateCodeQualityRule(formData: WizardFormData): string {
   const hasTypeScript = formData.additionalTech.includes('typescript');
-  const hasReact = formData.framework === 'react';
+  const hasReact = formData.additionalTech.includes('react') || formData.additionalTech.includes('nextjs');
+  const hasJava = formData.additionalTech.includes('java') || formData.additionalTech.includes('spring-boot');
+  const hasGo = formData.additionalTech.includes('golang') || formData.additionalTech.includes('gin');
   const hasLinting = formData.additionalTech.some(tech => ['eslint', 'biome', 'prettier'].includes(tech));
   const hasTesting = formData.additionalTech.some(tech => ['jest', 'vitest', 'cypress', 'playwright'].includes(tech));
 
@@ -704,9 +714,8 @@ const expensiveCalculation = memoize((data: ComplexData): ProcessedData => {
 Build secure applications from the ground up:
 
 \`\`\`typescript
-// Good: Secure input handling
+// Good: Secure input handling and validation
 import { escape } from 'html-escaper';
-import DOMPurify from 'dompurify';
 
 class SecureUserService {
   async updateUserProfile(userId: string, updates: UserProfileUpdate): Promise<User> {
@@ -719,176 +728,18 @@ class SecureUserService {
     // Validate business rules
     await this.validateProfileUpdates(userId, sanitizedUpdates);
     
-    // Update with audit trail
-    const updatedUser = await this.userRepository.updateWithAudit(
-      userId,
-      sanitizedUpdates,
-      { updatedBy: userId, timestamp: new Date() }
-    );
-    
-    this.logger.info('User profile updated', {
-      userId,
-      updatedFields: Object.keys(sanitizedUpdates),
-      timestamp: new Date().toISOString()
-    });
-    
-    return updatedUser;
+    return await this.userRepository.update(userId, sanitizedUpdates);
   }
   
   private sanitizeUserInput(input: UserProfileUpdate): UserProfileUpdate {
     return {
       name: input.name ? escape(input.name.trim()) : undefined,
-      bio: input.bio ? DOMPurify.sanitize(input.bio) : undefined,
-      website: input.website ? this.validateAndSanitizeUrl(input.website) : undefined,
+      bio: input.bio ? this.sanitizeHtml(input.bio) : undefined,
+      website: input.website ? this.validateUrl(input.website) : undefined,
     };
   }
-  
-  private validateAndSanitizeUrl(url: string): string {
-    try {
-      const parsed = new URL(url);
-      
-      // Only allow http/https protocols
-      if (!['http:', 'https:'].includes(parsed.protocol)) {
-        throw new ValidationError('Invalid URL protocol');
-      }
-      
-      return parsed.toString();
-    } catch {
-      throw new ValidationError('Invalid URL format');
-    }
-  }
-  
-  // Rate limiting decorator
-  @RateLimit({ requests: 10, per: 'minute' })
-  async sensitiveOperation(userId: string): Promise<void> {
-    // Implementation
-  }
 }
 \`\`\`
-
-## Quality Assurance Integration
-
-### Static Analysis Configuration
-Set up comprehensive linting and type checking:
-
-${hasLinting ? `\`\`\`json
-// .eslintrc.js - Comprehensive rules for quality
-{
-  "extends": [
-    ${hasTypeScript ? '"@typescript-eslint/recommended",' : ''}
-    ${hasTypeScript ? '"@typescript-eslint/recommended-requiring-type-checking",' : ''}
-    ${hasReact ? '"plugin:react/recommended",' : ''}
-    ${hasReact ? '"plugin:react-hooks/recommended",' : ''}
-    "plugin:security/recommended"
-  ],
-  "rules": {
-    // Code Quality
-    ${hasTypeScript ? '"@typescript-eslint/no-explicit-any": "error",' : ''}
-    ${hasTypeScript ? '"@typescript-eslint/no-unused-vars": "error",' : ''}
-    ${hasTypeScript ? '"@typescript-eslint/prefer-as-const": "error",' : ''}
-    ${hasTypeScript ? '"@typescript-eslint/prefer-nullish-coalescing": "error",' : ''}
-    ${hasTypeScript ? '"@typescript-eslint/prefer-optional-chain": "error",' : ''}
-    ${hasTypeScript ? '"@typescript-eslint/strict-boolean-expressions": "error",' : ''}
-    ${hasTypeScript ? '"@typescript-eslint/switch-exhaustiveness-check": "error",' : ''}
-    
-    // Security
-    "security/detect-object-injection": "error",
-    "security/detect-non-literal-regexp": "error",
-    "security/detect-unsafe-regex": "error",
-    
-    // Performance
-    "no-implied-eval": "error",
-    "no-new-func": "error",
-    "prefer-const": "error",
-    
-    // Maintainability
-    "max-complexity": ["error", 10],
-    "max-depth": ["error", 4],
-    "max-lines-per-function": ["error", 50],
-    "no-magic-numbers": ["error", { "ignore": [0, 1, -1] }]
-  }
-}
-\`\`\`` : ''}
-
-### Documentation Standards
-Document code for maintainability:
-
-\`\`\`typescript
-/**
- * Processes user payment with comprehensive validation and error handling.
- * 
- * @param userId - The unique identifier for the user
- * @param paymentData - Payment information including amount, method, and currency
- * @param options - Additional processing options
- * @returns Promise resolving to payment result with transaction ID
- * 
- * @throws {ValidationError} When payment data is invalid
- * @throws {InsufficientFundsError} When user has insufficient balance
- * @throws {PaymentProcessingError} When external payment service fails
- * 
- * @example
- * \`\`\`typescript
- * const result = await processPayment('user-123', {
- *   amount: 29.99,
- *   currency: 'USD',
- *   method: 'credit_card',
- *   source: 'card_token_abc123'
- * });
- * 
- * console.log('Payment processed:', result.transactionId);
- * \`\`\`
- */
-async function processPayment(
-  userId: string,
-  paymentData: PaymentRequest,
-  options: PaymentOptions = {}
-): Promise<PaymentResult> {
-  // Implementation with clear error handling
-}
-\`\`\`
-
-${hasTesting ? `### Test Coverage Requirements
-Maintain high test coverage with meaningful tests:
-
-\`\`\`typescript
-// Good: Comprehensive test coverage
-describe('UserService', () => {
-  describe('createUser', () => {
-    it('should create user with valid data', async () => {
-      // Arrange
-      const userData = createValidUserData();
-      const mockUser = { id: 'user-123', ...userData };
-      mockUserRepository.save.mockResolvedValue(mockUser);
-      
-      // Act
-      const result = await userService.createUser(userData);
-      
-      // Assert
-      expect(result).toEqual(mockUser);
-      expect(mockUserRepository.save).toHaveBeenCalledWith(
-        expect.objectContaining({
-          email: userData.email.toLowerCase(),
-          name: userData.name.trim()
-        })
-      );
-    });
-    
-    it('should throw ConflictError for duplicate email', async () => {
-      // Arrange
-      const userData = createValidUserData();
-      mockUserRepository.findByEmail.mockResolvedValue(existingUser);
-      
-      // Act & Assert
-      await expect(userService.createUser(userData))
-        .rejects.toThrow(ConflictError);
-    });
-    
-    it('should handle database errors gracefully', async () => {
-      // Test error scenarios
-    });
-  });
-});
-\`\`\`` : ''}
 
 ## Applied Quality Rules
 Based on your project configuration:
@@ -898,52 +749,6 @@ ${formData.codeQuality.map(rule => `- ${rule}`).join('\n')}
 ### Documentation Level: ${formData.documentationLevel}
 - Comment Styles: ${formData.commentStyle.join(', ')}
 - README Requirements: ${formData.readmeRequirements.join(', ')}
-
-## Quality Metrics and Monitoring
-
-Track code quality metrics continuously:
-
-\`\`\`typescript
-// Good: Quality metrics collection
-interface QualityMetrics {
-  codeComplexity: number;
-  testCoverage: number;
-  duplicationPercentage: number;
-  technicalDebtHours: number;
-  securityVulnerabilities: number;
-}
-
-class QualityMonitor {
-  async generateReport(): Promise<QualityReport> {
-    const metrics = await this.collectMetrics();
-    
-    return {
-      timestamp: new Date().toISOString(),
-      metrics,
-      recommendations: this.generateRecommendations(metrics),
-      trends: await this.calculateTrends(metrics)
-    };
-  }
-  
-  private generateRecommendations(metrics: QualityMetrics): string[] {
-    const recommendations: string[] = [];
-    
-    if (metrics.codeComplexity > 10) {
-      recommendations.push('Reduce code complexity by extracting functions');
-    }
-    
-    if (metrics.testCoverage < 80) {
-      recommendations.push('Increase test coverage to at least 80%');
-    }
-    
-    if (metrics.duplicationPercentage > 5) {
-      recommendations.push('Refactor duplicate code into reusable functions');
-    }
-    
-    return recommendations;
-  }
-}
-\`\`\`
 
 Remember: Code quality is not just about following rules—it's about creating maintainable, secure, and performant software that serves users reliably.`;
 }

@@ -1,0 +1,772 @@
+---
+description: Flask framework development best practices and modern patterns
+globs: "**/*.py"
+alwaysApply: false
+---
+# Flask Development Excellence
+
+## Application Structure and Configuration
+- Use Flask application factory pattern
+- Implement environment-based configuration
+- Use Blueprints for modular application structure
+- Follow Flask's convention for project organization
+
+## Database and ORM
+- Use Flask-SQLAlchemy for database operations
+- Implement proper model relationships and validations
+- Use Flask-Migrate for database migrations
+- Add database connection pooling and optimization
+- Use Alembic for advanced migration management
+- Optimize queries with lazy loading and eager loading
+
+## API Development and REST
+- Use Flask-RESTful or Flask-RESTX for API development
+- Implement proper error handling and responses
+- Add request validation with marshmallow
+- Use JWT for authentication and authorization
+
+## Testing Best Practices
+- Use pytest for modern testing patterns
+- Leverage Flask's test client for API testing
+- Use pytest fixtures for test data setup
+- Implement database testing with pytest-cov for coverage
+
+## Code Examples:
+
+```python
+# Good: Flask application factory pattern
+# app/__init__.py
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
+from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import os
+
+db = SQLAlchemy()
+migrate = Migrate()
+jwt = JWTManager()
+cors = CORS()
+limiter = Limiter(key_func=get_remote_address)
+
+def create_app(config_name=None):
+    """Application factory pattern."""
+    app = Flask(__name__)
+    
+    # Configuration
+    config_name = config_name or os.getenv('FLASK_ENV', 'development')
+    app.config.from_object(f'app.config.{config_name.title()}Config')
+    
+    # Initialize extensions
+    db.init_app(app)
+    migrate.init_app(app, db)
+    jwt.init_app(app)
+    cors.init_app(app)
+    limiter.init_app(app)
+    
+    # Register blueprints
+    from app.auth import auth_bp
+    from app.users import users_bp
+    from app.products import products_bp
+    
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(users_bp, url_prefix='/api/users')
+    app.register_blueprint(products_bp, url_prefix='/api/products')
+    
+    # Error handlers
+    register_error_handlers(app)
+    
+    # Health check
+    @app.route('/health')
+    def health_check():
+        return {'status': 'healthy', 'version': '1.0.0'}
+    
+    return app
+
+def register_error_handlers(app):
+    """Register global error handlers."""
+    
+    @app.errorhandler(400)
+    def bad_request(error):
+        return {'error': 'Bad request', 'message': str(error)}, 400
+    
+    @app.errorhandler(401)
+    def unauthorized(error):
+        return {'error': 'Unauthorized', 'message': 'Authentication required'}, 401
+    
+    @app.errorhandler(403)
+    def forbidden(error):
+        return {'error': 'Forbidden', 'message': 'Insufficient permissions'}, 403
+    
+    @app.errorhandler(404)
+    def not_found(error):
+        return {'error': 'Not found', 'message': 'Resource not found'}, 404
+    
+    @app.errorhandler(422)
+    def validation_error(error):
+        return {'error': 'Validation failed', 'message': str(error)}, 422
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        db.session.rollback()
+        return {'error': 'Internal server error', 'message': 'Something went wrong'}, 500
+
+# Good: Configuration management
+# app/config.py
+import os
+from datetime import timedelta
+
+class Config:
+    """Base configuration."""
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_RECORD_QUERIES = True
+    
+    # JWT Configuration
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key'
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+    
+    # Rate limiting
+    RATELIMIT_STORAGE_URL = os.environ.get('REDIS_URL', 'memory://')
+    
+    # Email configuration
+    MAIL_SERVER = os.environ.get('MAIL_SERVER')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in ['true', 'on', '1']
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+
+class DevelopmentConfig(Config):
+    """Development configuration."""
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
+        'sqlite:///dev.db'
+
+class ProductionConfig(Config):
+    """Production configuration."""
+    DEBUG = False
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'postgresql://user:pass@localhost/proddb'
+    
+    # Production security settings
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
+class TestingConfig(Config):
+    """Testing configuration."""
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    WTF_CSRF_ENABLED = False
+
+# Good: SQLAlchemy models with relationships
+# app/models.py
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Index
+from app import db
+
+class TimestampMixin:
+    """Mixin to add timestamp fields."""
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+class User(db.Model, TimestampMixin):
+    """User model."""
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128))
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+    last_login = db.Column(db.DateTime)
+    
+    # Relationships
+    orders = db.relationship('Order', backref='user', lazy='dynamic')
+    
+    # Indexes
+    __table_args__ = (
+        Index('ix_user_email_active', 'email', 'is_active'),
+    )
+    
+    def set_password(self, password):
+        """Set password hash."""
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Check password."""
+        return check_password_hash(self.password_hash, password)
+    
+    @property
+    def full_name(self):
+        """Get full name."""
+        return f"{self.first_name} {self.last_name}"
+    
+    def to_dict(self):
+        """Convert to dictionary."""
+        return {
+            'id': self.id,
+            'email': self.email,
+            'username': self.username,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'full_name': self.full_name,
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+    
+    def __repr__(self):
+        return f'<User {self.email}>'
+
+class Category(db.Model, TimestampMixin):
+    """Product category model."""
+    __tablename__ = 'categories'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    slug = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    description = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    
+    # Self-referential relationship for subcategories
+    parent_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    children = db.relationship('Category', backref=db.backref('parent', remote_side=[id]))
+    
+    # Relationships
+    products = db.relationship('Product', backref='category', lazy='dynamic')
+    
+    def to_dict(self):
+        """Convert to dictionary."""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'slug': self.slug,
+            'description': self.description,
+            'is_active': self.is_active,
+            'parent_id': self.parent_id,
+            'products_count': self.products.filter_by(is_active=True).count()
+        }
+    
+    def __repr__(self):
+        return f'<Category {self.name}>'
+
+class Product(db.Model, TimestampMixin):
+    """Product model."""
+    __tablename__ = 'products'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    slug = db.Column(db.String(200), unique=True, nullable=False, index=True)
+    description = db.Column(db.Text)
+    price = db.Column(db.Numeric(10, 2), nullable=False)
+    stock_quantity = db.Column(db.Integer, default=0, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    
+    # Foreign keys
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    
+    # Indexes
+    __table_args__ = (
+        Index('ix_product_category_active', 'category_id', 'is_active'),
+        Index('ix_product_price', 'price'),
+    )
+    
+    @property
+    def is_in_stock(self):
+        """Check if product is in stock."""
+        return self.stock_quantity > 0
+    
+    def to_dict(self, include_category=True):
+        """Convert to dictionary."""
+        data = {
+            'id': self.id,
+            'name': self.name,
+            'slug': self.slug,
+            'description': self.description,
+            'price': float(self.price),
+            'stock_quantity': self.stock_quantity,
+            'is_active': self.is_active,
+            'is_in_stock': self.is_in_stock,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+        
+        if include_category and self.category:
+            data['category'] = self.category.to_dict()
+        
+        return data
+    
+    def __repr__(self):
+        return f'<Product {self.name}>'
+
+# Good: Marshmallow schemas for validation
+# app/schemas.py
+from marshmallow import Schema, fields, validate, validates, ValidationError
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
+from app.models import User, Product, Category
+
+class UserSchema(SQLAlchemyAutoSchema):
+    """User schema for serialization/deserialization."""
+    
+    class Meta:
+        model = User
+        load_instance = True
+        exclude = ('password_hash',)
+    
+    password = fields.Str(write_only=True, required=True, validate=validate.Length(min=8))
+    confirm_password = fields.Str(write_only=True, required=True)
+    
+    @validates('email')
+    def validate_email(self, value):
+        """Validate email format."""
+        if User.query.filter_by(email=value).first():
+            raise ValidationError('Email already registered.')
+    
+    @validates('username')
+    def validate_username(self, value):
+        """Validate username."""
+        if User.query.filter_by(username=value).first():
+            raise ValidationError('Username already taken.')
+    
+    def validate(self, data, **kwargs):
+        """Cross-field validation."""
+        errors = {}
+        
+        if 'password' in data and 'confirm_password' in data:
+            if data['password'] != data['confirm_password']:
+                errors['confirm_password'] = ['Passwords do not match.']
+        
+        if errors:
+            raise ValidationError(errors)
+        
+        return data
+
+class ProductSchema(SQLAlchemyAutoSchema):
+    """Product schema."""
+    
+    class Meta:
+        model = Product
+        load_instance = True
+        include_relationships = True
+    
+    category = fields.Nested('CategorySchema', dump_only=True)
+    category_id = fields.Int(required=True)
+    price = fields.Decimal(required=True, validate=validate.Range(min=0.01))
+    stock_quantity = fields.Int(validate=validate.Range(min=0))
+    is_in_stock = fields.Bool(dump_only=True)
+
+class CategorySchema(SQLAlchemyAutoSchema):
+    """Category schema."""
+    
+    class Meta:
+        model = Category
+        load_instance = True
+    
+    products_count = fields.Int(dump_only=True)
+
+# Good: Flask Blueprint with RESTful endpoints
+# app/users/routes.py
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
+from marshmallow import ValidationError
+from sqlalchemy.exc import IntegrityError
+from app import db, limiter
+from app.models import User
+from app.schemas import UserSchema
+from app.utils.decorators import admin_required
+
+users_bp = Blueprint('users', __name__)
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
+
+@users_bp.route('/', methods=['POST'])
+@limiter.limit("5 per minute")
+def create_user():
+    """Create a new user."""
+    try:
+        user_data = user_schema.load(request.json)
+    except ValidationError as err:
+        return jsonify({'errors': err.messages}), 400
+    
+    # Remove confirm_password before creating user
+    password = user_data.pop('password')
+    user_data.pop('confirm_password', None)
+    
+    user = User(**user_data)
+    user.set_password(password)
+    
+    try:
+        db.session.add(user)
+        db.session.commit()
+        
+        # Create access token
+        access_token = create_access_token(identity=user.id)
+        
+        return jsonify({
+            'user': user_schema.dump(user),
+            'access_token': access_token
+        }), 201
+        
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'error': 'User already exists'}), 409
+
+@users_bp.route('/', methods=['GET'])
+@jwt_required()
+@admin_required
+def list_users():
+    """List all users with pagination."""
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 10, type=int), 100)
+    search = request.args.get('search', '')
+    
+    query = User.query
+    
+    if search:
+        query = query.filter(
+            db.or_(
+                User.email.contains(search),
+                User.first_name.contains(search),
+                User.last_name.contains(search)
+            )
+        )
+    
+    users = query.paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+    
+    return jsonify({
+        'users': users_schema.dump(users.items),
+        'pagination': {
+            'page': page,
+            'pages': users.pages,
+            'per_page': per_page,
+            'total': users.total,
+            'has_next': users.has_next,
+            'has_prev': users.has_prev
+        }
+    })
+
+@users_bp.route('/<int:user_id>', methods=['GET'])
+@jwt_required()
+def get_user(user_id):
+    """Get user by ID."""
+    current_user_id = get_jwt_identity()
+    
+    # Users can only view their own profile unless they're admin
+    if current_user_id != user_id:
+        current_user = User.query.get(current_user_id)
+        if not current_user or not current_user.is_admin:
+            return jsonify({'error': 'Access denied'}), 403
+    
+    user = User.query.get_or_404(user_id)
+    return jsonify(user_schema.dump(user))
+
+@users_bp.route('/<int:user_id>', methods=['PUT'])
+@jwt_required()
+def update_user(user_id):
+    """Update user."""
+    current_user_id = get_jwt_identity()
+    
+    # Users can only update their own profile unless they're admin
+    if current_user_id != user_id:
+        current_user = User.query.get(current_user_id)
+        if not current_user or not current_user.is_admin:
+            return jsonify({'error': 'Access denied'}), 403
+    
+    user = User.query.get_or_404(user_id)
+    
+    try:
+        user_data = user_schema.load(request.json, partial=True)
+    except ValidationError as err:
+        return jsonify({'errors': err.messages}), 400
+    
+    # Update user fields
+    for field, value in user_data.items():
+        if field != 'password':
+            setattr(user, field, value)
+    
+    if 'password' in user_data:
+        user.set_password(user_data['password'])
+    
+    try:
+        db.session.commit()
+        return jsonify(user_schema.dump(user))
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'error': 'Update failed'}), 409
+
+# Good: Utility decorators
+# app/utils/decorators.py
+from functools import wraps
+from flask import jsonify
+from flask_jwt_extended import get_jwt_identity
+from app.models import User
+
+def admin_required(f):
+    """Decorator to require admin privileges."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get(current_user_id)
+        
+        if not current_user or not current_user.is_admin:
+            return jsonify({'error': 'Admin privileges required'}), 403
+        
+        return f(*args, **kwargs)
+    return decorated_function
+```
+
+## Testing Best Practices
+
+```python
+# Good: Flask testing with pytest
+# tests/conftest.py
+import pytest
+from app import create_app, db
+from app.models import User, Category, Product
+
+@pytest.fixture
+def app():
+    """Create application for testing."""
+    app = create_app('testing')
+    
+    with app.app_context():
+        db.create_all()
+        yield app
+        db.drop_all()
+
+@pytest.fixture
+def client(app):
+    """Create test client."""
+    return app.test_client()
+
+@pytest.fixture
+def runner(app):
+    """Create test runner."""
+    return app.test_cli_runner()
+
+@pytest.fixture
+def user(app):
+    """Create test user."""
+    user = User(
+        email='test@example.com',
+        username='testuser',
+        first_name='Test',
+        last_name='User'
+    )
+    user.set_password('testpass123')
+    
+    db.session.add(user)
+    db.session.commit()
+    return user
+
+@pytest.fixture
+def auth_headers(client, user):
+    """Get authentication headers."""
+    response = client.post('/api/auth/login', json={
+        'email': user.email,
+        'password': 'testpass123'
+    })
+    
+    token = response.json['access_token']
+    return {'Authorization': f'Bearer {token}'}
+
+# tests/test_users.py
+def test_create_user(client):
+    """Test user creation."""
+    data = {
+        'email': 'newuser@example.com',
+        'username': 'newuser',
+        'first_name': 'New',
+        'last_name': 'User',
+        'password': 'newpass123',
+        'confirm_password': 'newpass123'
+    }
+    
+    response = client.post('/api/users/', json=data)
+    
+    assert response.status_code == 201
+    assert 'user' in response.json
+    assert 'access_token' in response.json
+    assert response.json['user']['email'] == data['email']
+
+def test_get_user_profile(client, user, auth_headers):
+    """Test getting user profile."""
+    response = client.get(f'/api/users/{user.id}', headers=auth_headers)
+    
+    assert response.status_code == 200
+    assert response.json['email'] == user.email
+
+# Good: Advanced testing with pytest and SQLAlchemy
+@pytest.fixture
+def db_session(app):
+    """Database session for testing."""
+    with app.app_context():
+        db.create_all()
+        yield db.session
+        db.session.rollback()
+        db.drop_all()
+
+@pytest.fixture
+def sample_user(db_session):
+    """Create sample user for testing."""
+    user = User(
+        email='test@example.com',
+        username='testuser',
+        first_name='Test',
+        last_name='User'
+    )
+    user.set_password('testpass123')
+    
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+def test_user_model_creation(db_session):
+    """Test user model creation and validation."""
+    user = User(
+        email='model@example.com',
+        username='modeluser',
+        first_name='Model',
+        last_name='User'
+    )
+    user.set_password('modelpass123')
+    
+    db_session.add(user)
+    db_session.commit()
+    
+    assert user.id is not None
+    assert user.email == 'model@example.com'
+    assert user.check_password('modelpass123')
+    assert user.full_name == 'Model User'
+
+def test_user_password_hashing(db_session):
+    """Test password hashing functionality."""
+    user = User(
+        email='hash@example.com',
+        username='hashuser',
+        first_name='Hash',
+        last_name='User'
+    )
+    
+    password = 'securepassword123'
+    user.set_password(password)
+    
+    # Password should be hashed
+    assert user.password_hash != password
+    assert user.check_password(password)
+    assert not user.check_password('wrongpassword')
+
+@pytest.mark.parametrize("email,username,expected_status", [
+    ('valid@example.com', 'validuser', 201),
+    ('invalid-email', 'invaliduser', 400),
+    ('', 'emptyemail', 400),
+])
+def test_user_creation_validation(client, email, username, expected_status):
+    """Test user creation with various validation scenarios."""
+    data = {
+        'email': email,
+        'username': username,
+        'first_name': 'Test',
+        'last_name': 'User',
+        'password': 'testpass123',
+        'confirm_password': 'testpass123'
+    }
+    
+    response = client.post('/api/users/', json=data)
+    assert response.status_code == expected_status
+
+def test_user_api_pagination(client, auth_headers):
+    """Test user list API with pagination."""
+    # Create multiple users
+    for i in range(15):
+        user = User(
+            email=f'user{i}@example.com',
+            username=f'user{i}',
+            first_name=f'User{i}',
+            last_name='Test'
+        )
+        user.set_password('testpass123')
+        db.session.add(user)
+    
+    db.session.commit()
+    
+    # Test first page
+    response = client.get('/api/users/?page=1&per_page=10', headers=auth_headers)
+    
+    assert response.status_code == 200
+    assert len(response.json['users']) == 10
+    assert response.json['pagination']['page'] == 1
+    assert response.json['pagination']['total'] > 10
+
+def test_database_rollback_on_error(client, db_session):
+    """Test database rollback on validation error."""
+    initial_count = User.query.count()
+    
+    # Try to create user with invalid data that should trigger rollback
+    data = {
+        'email': 'duplicate@example.com',
+        'username': 'duplicate',
+        'first_name': 'Duplicate',
+        'last_name': 'User',
+        'password': 'testpass123',
+        'confirm_password': 'testpass123'
+    }
+    
+    # First creation should succeed
+    response1 = client.post('/api/users/', json=data)
+    assert response1.status_code == 201
+    
+    # Second creation should fail due to unique constraint
+    response2 = client.post('/api/users/', json=data)
+    assert response2.status_code == 409
+    
+    # Verify only one user was created
+    final_count = User.query.count()
+    assert final_count == initial_count + 1
+
+# Good: Testing JWT authentication flow
+def test_jwt_authentication_flow(client, sample_user):
+    """Test complete JWT authentication flow."""
+    # Test login
+    login_data = {
+        'email': sample_user.email,
+        'password': 'testpass123'
+    }
+    
+    response = client.post('/api/auth/login', json=login_data)
+    
+    assert response.status_code == 200
+    assert 'access_token' in response.json
+    
+    token = response.json['access_token']
+    
+    # Test protected endpoint with valid token
+    headers = {'Authorization': f'Bearer {token}'}
+    response = client.get('/api/users/profile', headers=headers)
+    
+    assert response.status_code == 200
+    assert response.json['email'] == sample_user.email
+    
+    # Test protected endpoint with invalid token
+    headers = {'Authorization': 'Bearer invalid_token'}
+    response = client.get('/api/users/profile', headers=headers)
+    
+    assert response.status_code == 401
+
+# Good: Testing with coverage
+# Run with: pytest --cov=app --cov-report=html --cov-fail-under=80
+# This ensures minimum 80% test coverage
+```

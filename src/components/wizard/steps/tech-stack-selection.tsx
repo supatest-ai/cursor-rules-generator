@@ -124,6 +124,9 @@ const technologies: Record<string, Technology[]> = {
     { id: "echo", label: "Echo", icon: SiGo, color: "text-blue-500" },
     { id: "fiber", label: "Fiber", icon: SiGo, color: "text-gray-700" },
     { id: "gorilla-mux", label: "Gorilla Mux", icon: SiGo, color: "text-orange-500" },
+    { id: "fastapi", label: "FastAPI", icon: SiPython, color: "text-blue-500" },
+    { id: "django", label: "Django", icon: SiPython, color: "text-green-600" },
+    { id: "flask", label: "Flask", icon: SiPython, color: "text-red-500" },
   ],
 
   "Styling & UI": [
@@ -140,6 +143,11 @@ const technologies: Record<string, Technology[]> = {
   "Database & ORM": [
     { id: "drizzle", label: "Drizzle ORM", icon: SiPrisma, color: "text-green-600" },
     { id: "prisma", label: "Prisma ORM", icon: SiPrisma, color: "text-indigo-600" },
+    { id: "sqlalchemy", label: "SQLAlchemy", icon: SiPython, color: "text-blue-500" },
+    { id: "sqlmodel", label: "SQLModel", icon: SiPython, color: "text-green-500" },
+    { id: "tortoise-orm", label: "Tortoise ORM", icon: SiPython, color: "text-purple-500" },
+    { id: "peewee", label: "Peewee", icon: SiPython, color: "text-orange-500" },
+    { id: "alembic", label: "Alembic", icon: SiPython, color: "text-gray-600" },
     { id: "postgresql", label: "PostgreSQL", icon: SiPostgresql, color: "text-blue-700" },
     { id: "mysql", label: "MySQL", icon: SiMysql, color: "text-orange-600" },
     { id: "sqlite", label: "SQLite", icon: SiSqlite, color: "text-blue-500" },
@@ -173,6 +181,13 @@ const technologies: Record<string, Technology[]> = {
     { id: "vitest", label: "Vitest", icon: SiVitest, color: "text-yellow-500" },
     { id: "cypress", label: "Cypress", icon: SiCypress, color: "text-gray-700" },
     { id: "playwright", label: "Playwright", icon: SiCypress, color: "text-green-600" },
+    { id: "pytest", label: "pytest", icon: SiPython, color: "text-blue-500" },
+    { id: "pytest-asyncio", label: "pytest-asyncio", icon: SiPython, color: "text-purple-500" },
+    { id: "pytest-django", label: "pytest-django", icon: SiPython, color: "text-green-600" },
+    { id: "pytest-cov", label: "pytest-cov", icon: SiPython, color: "text-orange-500" },
+    { id: "hypothesis", label: "Hypothesis", icon: SiPython, color: "text-indigo-500" },
+    { id: "factory-boy", label: "Factory Boy", icon: SiPython, color: "text-red-500" },
+    { id: "unittest", label: "unittest", icon: SiPython, color: "text-gray-600" },
     { id: "storybook", label: "Storybook", icon: SiStorybook, color: "text-pink-500" },
   ],
 
@@ -186,6 +201,22 @@ const technologies: Record<string, Technology[]> = {
     { id: "zod", label: "Zod", icon: SiZod, color: "text-blue-600" },
     { id: "valibot", label: "Valibot", icon: SiZod, color: "text-purple-500" },
     { id: "yup", label: "Yup", icon: SiZod, color: "text-orange-500" },
+    { id: "pydantic", label: "Pydantic", icon: SiPython, color: "text-blue-500" },
+  ],
+
+  "Python Libraries": [
+    { id: "uvicorn", label: "Uvicorn", icon: SiPython, color: "text-green-500" },
+    { id: "gunicorn", label: "Gunicorn", icon: SiPython, color: "text-blue-600" },
+    { id: "celery", label: "Celery", icon: SiPython, color: "text-green-600" },
+    { id: "redis-py", label: "redis-py", icon: SiRedis, color: "text-red-600" },
+    { id: "requests", label: "Requests", icon: SiPython, color: "text-orange-500" },
+    { id: "httpx", label: "HTTPX", icon: SiPython, color: "text-purple-500" },
+    { id: "aiohttp", label: "aiohttp", icon: SiPython, color: "text-blue-500" },
+    { id: "psycopg2", label: "psycopg2", icon: SiPostgresql, color: "text-blue-700" },
+    { id: "pymongo", label: "PyMongo", icon: SiMongodb, color: "text-green-600" },
+    { id: "pandas", label: "Pandas", icon: SiPython, color: "text-gray-700" },
+    { id: "numpy", label: "NumPy", icon: SiPython, color: "text-blue-400" },
+    { id: "python-jose", label: "python-jose", icon: SiPython, color: "text-indigo-500" },
   ],
 
   "Monorepo Tools": [
@@ -223,6 +254,18 @@ const presets = {
   "Vue.js Ecosystem": [
     "typescript", "vue", "nodejs", "vite", "tailwind", "postgresql", "drizzle",
     "vitest", "biome", "netlify", "pnpm"
+  ],
+  "Python FastAPI": [
+    "python", "fastapi", "sqlmodel", "pydantic", "uvicorn", "postgresql", "redis", 
+    "pytest", "pytest-asyncio", "pytest-cov", "alembic", "python-jose", "docker"
+  ],
+  "Python Django": [
+    "python", "django", "postgresql", "redis", "gunicorn", "celery", 
+    "pytest", "pytest-django", "pytest-cov", "factory-boy", "docker"
+  ],
+  "Python Flask": [
+    "python", "flask", "sqlalchemy", "postgresql", "gunicorn", 
+    "pytest", "pytest-cov", "alembic", "docker"
   ],
   "Enterprise Java": [
     "java", "spring-boot", "postgresql", "docker", "aws"

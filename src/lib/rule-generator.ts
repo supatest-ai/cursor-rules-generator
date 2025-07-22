@@ -58,6 +58,43 @@ export function generateRules(formData: WizardFormData) {
       });
     }
 
+    // Check for Python frameworks
+    if (formData.additionalTech.includes('fastapi') && frameworkTemplates.python) {
+      Object.entries(frameworkTemplates.python).forEach(([ruleId, content]) => {
+        if (ruleId === 'fastapi-development') {
+          rules.push({
+            filename: `${ruleId}.mdc`,
+            content,
+            isStatic: false
+          });
+        }
+      });
+    }
+
+    if (formData.additionalTech.includes('django') && frameworkTemplates.python) {
+      Object.entries(frameworkTemplates.python).forEach(([ruleId, content]) => {
+        if (ruleId === 'django-development') {
+          rules.push({
+            filename: `${ruleId}.mdc`,
+            content,
+            isStatic: false
+          });
+        }
+      });
+    }
+
+    if (formData.additionalTech.includes('flask') && frameworkTemplates.python) {
+      Object.entries(frameworkTemplates.python).forEach(([ruleId, content]) => {
+        if (ruleId === 'flask-development') {
+          rules.push({
+            filename: `${ruleId}.mdc`,
+            content,
+            isStatic: false
+          });
+        }
+      });
+    }
+
     // Add task-specific rules
     const taskTemplates = getTaskTemplates();
 

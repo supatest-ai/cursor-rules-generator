@@ -1,0 +1,814 @@
+---
+description: Django framework development best practices and modern patterns
+globs: "**/*.py"
+alwaysApply: false
+---
+# Django Development Excellence
+
+## Project Structure and Settings
+- Use environment-based settings with django-environ
+- Implement proper app organization with clear separation of concerns
+- Use Django's built-in security features
+- Follow the Model-View-Template (MVT) pattern
+
+## Model Design and Database
+- Use Django ORM effectively with proper relationships
+- Implement custom managers and querysets for complex queries
+- Add proper model validation and clean methods
+- Use migrations for all schema changes
+- Optimize queries with select_related and prefetch_related
+- Use database constraints and indexes for performance
+
+## API Development with Django REST Framework
+- Use serializers for data validation and transformation
+- Implement proper viewsets and permissions
+- Add pagination and filtering to list endpoints
+- Use throttling for rate limiting
+
+## Testing with pytest-django
+- Use pytest-django for modern testing patterns
+- Leverage Django fixtures and factories with Factory Boy
+- Test database operations with pytest-django database access
+- Use pytest-cov for comprehensive test coverage
+
+## Code Examples:
+
+```python
+# Good: Django settings structure
+# settings/base.py
+import environ
+from pathlib import Path
+
+env = environ.Env(
+    DEBUG=(bool, False),
+    SECRET_KEY=(str, ''),
+    DATABASE_URL=(str, ''),
+)
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Read .env file
+environ.Env.read_env(BASE_DIR / '.env')
+
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env('DEBUG')
+
+DJANGO_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+]
+
+THIRD_PARTY_APPS = [
+    'rest_framework',
+    'corsheaders',
+    'django_filters',
+]
+
+LOCAL_APPS = [
+    'users',
+    'products',
+    'orders',
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour'
+    }
+}
+
+# Good: Custom User model
+# users/models.py
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.core.validators import RegexValidator
+
+class UserManager(models.Manager):
+    """Custom user manager."""
+    
+    def get_active_users(self):
+        return self.filter(is_active=True)
+    
+    def get_by_email(self, email):
+        return self.get(email__iexact=email)
+
+class User(AbstractUser):
+    """Custom user model with additional fields."""
+    
+    email = models.EmailField(unique=True)
+    phone_number = models.CharField(
+        max_length=17,
+        validators=[
+            RegexValidator(
+                regex=r'^\+?1?\d{9,15}$',
+                message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
+            )
+        ],
+        blank=True
+    )
+    date_of_birth = models.DateField(null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
+    is_email_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = UserManager()
+    
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    
+    class Meta:
+        db_table = 'users'
+        indexes = [
+            models.Index(fields=['email']),
+            models.Index(fields=['created_at']),
+        ]
+    
+    def clean(self):
+        """Custom validation."""
+        super().clean()
+        if self.email:
+            self.email = self.email.lower()
+    
+    def save(self, *args, **kwargs):
+        """Override save to call clean."""
+        self.clean()
+        super().save(*args, **kwargs)
+    
+    def get_full_name(self):
+        """Return the full name."""
+        return f"{self.first_name} {self.last_name}".strip()
+    
+    def __str__(self):
+        return self.email
+
+# Good: Product model with relationships
+# products/models.py
+from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+from decimal import Decimal
+
+class CategoryManager(models.Manager):
+    """Custom category manager."""
+    
+    def get_active_categories(self):
+        return self.filter(is_active=True)
+
+class Category(models.Model):
+    """Product category model."""
+    
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(unique=True)
+    description = models.TextField(blank=True)
+    parent = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        related_name='children',
+        on_delete=models.CASCADE
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    objects = CategoryManager()
+    
+    class Meta:
+        verbose_name_plural = 'categories'
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+class ProductQuerySet(models.QuerySet):
+    """Custom product queryset."""
+    
+    def active(self):
+        return self.filter(is_active=True)
+    
+    def in_stock(self):
+        return self.filter(stock_quantity__gt=0)
+    
+    def by_category(self, category):
+        return self.filter(category=category)
+
+class ProductManager(models.Manager):
+    """Custom product manager."""
+    
+    def get_queryset(self):
+        return ProductQuerySet(self.model, using=self._db)
+    
+    def active(self):
+        return self.get_queryset().active()
+    
+    def in_stock(self):
+        return self.get_queryset().in_stock()
+
+class Product(models.Model):
+    """Product model."""
+    
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    description = models.TextField()
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))]
+    )
+    stock_quantity = models.PositiveIntegerField(default=0)
+    category = models.ForeignKey(
+        Category,
+        related_name='products',
+        on_delete=models.CASCADE
+    )
+    tags = models.ManyToManyField('Tag', blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = ProductManager()
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['category', 'is_active']),
+            models.Index(fields=['price']),
+        ]
+    
+    def clean(self):
+        """Custom validation."""
+        if self.price and self.price <= 0:
+            raise ValidationError({'price': 'Price must be greater than zero'})
+    
+    def is_in_stock(self):
+        """Check if product is in stock."""
+        return self.stock_quantity > 0
+    
+    def __str__(self):
+        return self.name
+
+# Good: Django REST Framework serializers
+# products/serializers.py
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from .models import Product, Category
+
+User = get_user_model()
+
+class CategorySerializer(serializers.ModelSerializer):
+    """Category serializer."""
+    
+    products_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Category
+        fields = [
+            'id', 'name', 'slug', 'description', 
+            'parent', 'is_active', 'products_count'
+        ]
+        read_only_fields = ['id']
+    
+    def get_products_count(self, obj):
+        """Get number of active products in category."""
+        return obj.products.filter(is_active=True).count()
+
+class ProductSerializer(serializers.ModelSerializer):
+    """Product serializer."""
+    
+    category = CategorySerializer(read_only=True)
+    category_id = serializers.IntegerField(write_only=True)
+    is_in_stock = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'name', 'slug', 'description', 'price',
+            'stock_quantity', 'category', 'category_id',
+            'is_active', 'is_in_stock', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+    
+    def get_is_in_stock(self, obj):
+        """Check if product is in stock."""
+        return obj.is_in_stock()
+    
+    def validate_price(self, value):
+        """Validate price is positive."""
+        if value <= 0:
+            raise serializers.ValidationError("Price must be greater than zero")
+        return value
+    
+    def validate_category_id(self, value):
+        """Validate category exists and is active."""
+        try:
+            category = Category.objects.get(id=value, is_active=True)
+        except Category.DoesNotExist:
+            raise serializers.ValidationError("Invalid or inactive category")
+        return value
+
+# Good: ViewSets with proper permissions
+# products/views.py
+from rest_framework import viewsets, filters, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db import transaction
+from .models import Product, Category
+from .serializers import ProductSerializer, CategorySerializer
+from .filters import ProductFilter
+from .permissions import IsOwnerOrReadOnly
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """Category viewset."""
+    
+    queryset = Category.objects.get_active_categories()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ['name', 'description']
+    filterset_fields = ['parent', 'is_active']
+
+class ProductViewSet(viewsets.ModelViewSet):
+    """Product viewset with filtering and custom actions."""
+    
+    queryset = Product.objects.active().select_related('category')
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter
+    ]
+    filterset_class = ProductFilter
+    search_fields = ['name', 'description']
+    ordering_fields = ['price', 'created_at', 'name']
+    ordering = ['-created_at']
+    
+    def get_queryset(self):
+        """Custom queryset based on user permissions."""
+        queryset = super().get_queryset()
+        if not self.request.user.is_staff:
+            queryset = queryset.filter(is_active=True)
+        return queryset
+    
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        """Create product with transaction."""
+        return super().create(request, *args, **kwargs)
+    
+    @action(detail=True, methods=['post'])
+    def update_stock(self, request, pk=None):
+        """Update product stock quantity."""
+        product = self.get_object()
+        quantity = request.data.get('quantity')
+        
+        if quantity is None:
+            return Response(
+                {'error': 'Quantity is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            quantity = int(quantity)
+            if quantity < 0:
+                raise ValueError()
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'Quantity must be a non-negative integer'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        product.stock_quantity = quantity
+        product.save(update_fields=['stock_quantity'])
+        
+        serializer = self.get_serializer(product)
+        return Response(serializer.data)
+    
+    @action(detail=False)
+    def low_stock(self, request):
+        """Get products with low stock."""
+        threshold = int(request.query_params.get('threshold', 10))
+        products = self.get_queryset().filter(
+            stock_quantity__lte=threshold,
+            stock_quantity__gt=0
+        )
+        
+        page = self.paginate_queryset(products)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data)
+
+# Good: Custom permissions
+# products/permissions.py
+from rest_framework import permissions
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    """Custom permission to only allow owners to edit objects."""
+    
+    def has_object_permission(self, request, view, obj):
+        # Read permissions for any request
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        
+        # Write permissions only to owner
+        return obj.created_by == request.user
+
+# Good: Django filters
+# products/filters.py
+import django_filters
+from .models import Product, Category
+
+class ProductFilter(django_filters.FilterSet):
+    """Product filter set."""
+    
+    name = django_filters.CharFilter(lookup_expr='icontains')
+    price_min = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
+    price_max = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
+    category = django_filters.ModelChoiceFilter(queryset=Category.objects.get_active_categories())
+    in_stock = django_filters.BooleanFilter(method='filter_in_stock')
+    
+    class Meta:
+        model = Product
+        fields = ['name', 'category', 'is_active']
+    
+    def filter_in_stock(self, queryset, name, value):
+        """Filter products based on stock availability."""
+        if value:
+            return queryset.filter(stock_quantity__gt=0)
+        return queryset.filter(stock_quantity=0)
+```
+
+## Testing Best Practices
+
+```python
+# Good: Django testing with fixtures
+# tests/test_models.py
+from django.test import TestCase
+from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
+from products.models import Category, Product
+
+User = get_user_model()
+
+class ProductModelTest(TestCase):
+    """Test Product model."""
+    
+    def setUp(self):
+        """Set up test data."""
+        self.category = Category.objects.create(
+            name='Electronics',
+            slug='electronics'
+        )
+    
+    def test_product_creation(self):
+        """Test product creation."""
+        product = Product.objects.create(
+            name='Test Product',
+            slug='test-product',
+            description='Test description',
+            price=99.99,
+            stock_quantity=10,
+            category=self.category
+        )
+        
+        self.assertEqual(product.name, 'Test Product')
+        self.assertTrue(product.is_in_stock())
+    
+    def test_product_validation(self):
+        """Test product validation."""
+        product = Product(
+            name='Test Product',
+            slug='test-product',
+            description='Test description',
+            price=-10.00,  # Invalid price
+            category=self.category
+        )
+        
+        with self.assertRaises(ValidationError):
+            product.clean()
+
+# Good: API testing
+# tests/test_api.py
+from rest_framework.test import APITestCase
+from rest_framework import status
+from django.contrib.auth import get_user_model
+from products.models import Category, Product
+
+User = get_user_model()
+
+class ProductAPITest(APITestCase):
+    """Test Product API."""
+    
+    def setUp(self):
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpass123'
+        )
+        self.category = Category.objects.create(
+            name='Electronics',
+            slug='electronics'
+        )
+    
+    def test_create_product_authenticated(self):
+        """Test product creation with authentication."""
+        self.client.force_authenticate(user=self.user)
+        
+        data = {
+            'name': 'New Product',
+            'slug': 'new-product',
+            'description': 'New product description',
+            'price': '99.99',
+            'stock_quantity': 10,
+            'category_id': self.category.id
+        }
+        
+        response = self.client.post('/api/products/', data)
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Product.objects.count(), 1)
+    
+    def test_list_products_pagination(self):
+        """Test product list with pagination."""
+        # Create multiple products
+        for i in range(25):
+            Product.objects.create(
+                name=f'Product {i}',
+                slug=f'product-{i}',
+                description=f'Description {i}',
+                price=10.00 + i,
+                category=self.category
+            )
+        
+        response = self.client.get('/api/products/')
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('results', response.data)
+        self.assertEqual(len(response.data['results']), 20)  # Default page size
+
+## Advanced Testing with pytest-django
+
+```python
+# Good: pytest-django configuration
+# pytest.ini or pyproject.toml
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "myproject.settings.test"
+addopts = "--cov=myapp --cov-report=html --cov-report=term-missing"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+
+# Good: Factory Boy for test data generation
+# tests/factories.py
+import factory
+from django.contrib.auth import get_user_model
+from products.models import Category, Product
+
+User = get_user_model()
+
+class UserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = User
+    
+    email = factory.Sequence(lambda n: f"user{n}@example.com")
+    username = factory.Sequence(lambda n: f"user{n}")
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    is_active = True
+
+class CategoryFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Category
+    
+    name = factory.Faker('word')
+    slug = factory.LazyAttribute(lambda obj: obj.name.lower())
+    description = factory.Faker('text', max_nb_chars=200)
+    is_active = True
+
+class ProductFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Product
+    
+    name = factory.Faker('commerce_product_name')
+    slug = factory.LazyAttribute(lambda obj: obj.name.lower().replace(' ', '-'))
+    description = factory.Faker('text', max_nb_chars=500)
+    price = factory.Faker('pydecimal', left_digits=3, right_digits=2, positive=True)
+    stock_quantity = factory.Faker('random_int', min=0, max=100)
+    category = factory.SubFactory(CategoryFactory)
+    is_active = True
+
+# Good: pytest-django test examples
+# tests/test_models.py
+import pytest
+from django.core.exceptions import ValidationError
+from products.models import Product, Category
+from tests.factories import UserFactory, CategoryFactory, ProductFactory
+
+@pytest.mark.django_db
+class TestProductModel:
+    """Test Product model with pytest-django."""
+    
+    def test_product_creation(self):
+        """Test product creation with factory."""
+        product = ProductFactory()
+        
+        assert product.id is not None
+        assert product.name is not None
+        assert product.is_in_stock() == (product.stock_quantity > 0)
+    
+    def test_product_validation(self):
+        """Test product validation."""
+        product = ProductFactory.build(price=-10.00)  # Invalid price
+        
+        with pytest.raises(ValidationError):
+            product.clean()
+    
+    def test_product_str_representation(self):
+        """Test product string representation."""
+        product = ProductFactory(name="Test Product")
+        assert str(product) == "Test Product"
+    
+    @pytest.mark.parametrize("stock_quantity,expected", [
+        (0, False),
+        (1, True),
+        (10, True),
+    ])
+    def test_is_in_stock(self, stock_quantity, expected):
+        """Test is_in_stock method with parametrization."""
+        product = ProductFactory(stock_quantity=stock_quantity)
+        assert product.is_in_stock() == expected
+
+# Good: API testing with pytest-django
+# tests/test_api.py
+import pytest
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APIClient
+from tests.factories import UserFactory, CategoryFactory, ProductFactory
+
+@pytest.fixture
+def api_client():
+    """API client fixture."""
+    return APIClient()
+
+@pytest.fixture
+def authenticated_user(api_client):
+    """Authenticated user fixture."""
+    user = UserFactory()
+    api_client.force_authenticate(user=user)
+    return user
+
+@pytest.mark.django_db
+class TestProductAPI:
+    """Test Product API endpoints."""
+    
+    def test_list_products_unauthenticated(self, api_client):
+        """Test listing products without authentication."""
+        ProductFactory.create_batch(3)
+        
+        url = reverse('product-list')
+        response = api_client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 3
+    
+    def test_create_product_authenticated(self, api_client, authenticated_user):
+        """Test creating product with authentication."""
+        category = CategoryFactory()
+        data = {
+            'name': 'New Product',
+            'slug': 'new-product',
+            'description': 'New product description',
+            'price': '99.99',
+            'stock_quantity': 10,
+            'category_id': category.id
+        }
+        
+        url = reverse('product-list')
+        response = api_client.post(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_201_CREATED
+        assert Product.objects.count() == 1
+        assert response.data['name'] == data['name']
+    
+    def test_update_product_permissions(self, api_client):
+        """Test product update requires authentication."""
+        product = ProductFactory()
+        
+        url = reverse('product-detail', kwargs={'pk': product.pk})
+        data = {'name': 'Updated Name'}
+        response = api_client.patch(url, data, format='json')
+        
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    
+    @pytest.mark.parametrize("filter_param,filter_value,expected_count", [
+        ('category', None, 5),
+        ('is_active', True, 3),
+        ('is_active', False, 2),
+    ])
+    def test_product_filtering(self, api_client, filter_param, filter_value, expected_count):
+        """Test product filtering with parametrization."""
+        category = CategoryFactory()
+        
+        # Create products with different states
+        ProductFactory.create_batch(3, category=category, is_active=True)
+        ProductFactory.create_batch(2, category=category, is_active=False)
+        
+        url = reverse('product-list')
+        params = {}
+        if filter_param == 'category':
+            params['category'] = category.id
+            expected_count = 5
+        elif filter_param == 'is_active':
+            params['is_active'] = filter_value
+        
+        response = api_client.get(url, params)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == expected_count
+
+# Good: Database testing with transactions
+@pytest.mark.django_db(transaction=True)
+class TestTransactionalOperations:
+    """Test operations requiring database transactions."""
+    
+    def test_bulk_product_creation(self):
+        """Test bulk creation of products."""
+        category = CategoryFactory()
+        
+        products_data = [
+            Product(
+                name=f'Product {i}',
+                slug=f'product-{i}',
+                description=f'Description {i}',
+                price=10.00 + i,
+                category=category
+            )
+            for i in range(100)
+        ]
+        
+        Product.objects.bulk_create(products_data)
+        
+        assert Product.objects.count() == 100
+        assert Product.objects.filter(category=category).count() == 100
+
+# Good: Testing custom managers and querysets
+@pytest.mark.django_db
+class TestCustomQuerysets:
+    """Test custom manager and queryset methods."""
+    
+    def test_active_products_queryset(self):
+        """Test active products custom queryset."""
+        active_products = ProductFactory.create_batch(3, is_active=True)
+        inactive_products = ProductFactory.create_batch(2, is_active=False)
+        
+        active_count = Product.objects.active().count()
+        
+        assert active_count == 3
+    
+    def test_in_stock_products(self):
+        """Test in stock products filter."""
+        in_stock = ProductFactory.create_batch(3, stock_quantity=10)
+        out_of_stock = ProductFactory.create_batch(2, stock_quantity=0)
+        
+        in_stock_count = Product.objects.in_stock().count()
+        
+                 assert in_stock_count == 3
+```

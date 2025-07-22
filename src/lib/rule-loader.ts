@@ -4,6 +4,9 @@ import selfImproveContent from '../rules/static/self-improve.mdc?raw';
 import reactDevelopmentContent from '../rules/frameworks/react/react-development.mdc?raw';
 import springBootDevelopmentContent from '../rules/frameworks/java/spring-boot-development.mdc?raw';
 import ginDevelopmentContent from '../rules/frameworks/golang/gin-development.mdc?raw';
+import fastapiDevelopmentContent from '../rules/frameworks/python/fastapi-development.mdc?raw';
+import djangoDevelopmentContent from '../rules/frameworks/python/django-development.mdc?raw';
+import flaskDevelopmentContent from '../rules/frameworks/python/flask-development.mdc?raw';
 import featuresContent from '../rules/tasks/features.mdc?raw';
 
 export interface RuleMetadata {
@@ -39,6 +42,9 @@ const RULE_CONTENT_MAP: Record<string, string> = {
     'react-development': reactDevelopmentContent,
     'spring-boot-development': springBootDevelopmentContent,
     'gin-development': ginDevelopmentContent,
+    'fastapi-development': fastapiDevelopmentContent,
+    'django-development': djangoDevelopmentContent,
+    'flask-development': flaskDevelopmentContent,
     'features': featuresContent
 };
 
@@ -101,6 +107,41 @@ export const RULE_METADATA: RuleMetadata[] = [
         filePath: 'src/rules/frameworks/golang/gin-development.mdc'
     },
 
+    // Python framework rules
+    {
+        id: 'fastapi-development',
+        name: 'FastAPI Development',
+        description: 'FastAPI framework development best practices and modern patterns',
+        globs: '**/*.py',
+        alwaysApply: false,
+        category: 'framework',
+        technology: 'python',
+        framework: 'fastapi',
+        filePath: 'src/rules/frameworks/python/fastapi-development.mdc'
+    },
+    {
+        id: 'django-development',
+        name: 'Django Development',
+        description: 'Django framework development best practices and modern patterns',
+        globs: '**/*.py',
+        alwaysApply: false,
+        category: 'framework',
+        technology: 'python',
+        framework: 'django',
+        filePath: 'src/rules/frameworks/python/django-development.mdc'
+    },
+    {
+        id: 'flask-development',
+        name: 'Flask Development',
+        description: 'Flask framework development best practices and modern patterns',
+        globs: '**/*.py',
+        alwaysApply: false,
+        category: 'framework',
+        technology: 'python',
+        framework: 'flask',
+        filePath: 'src/rules/frameworks/python/flask-development.mdc'
+    },
+
     // Task-based rules
     {
         id: 'features',
@@ -149,6 +190,31 @@ export const TECHNOLOGY_CONFIG: TechnologyConfig[] = [
                 name: 'Gin',
                 description: 'Fast HTTP web framework',
                 rules: ['gin-development']
+            }
+        ]
+    },
+    {
+        id: 'python',
+        name: 'Python',
+        description: 'Python backend development',
+        frameworks: [
+            {
+                id: 'fastapi',
+                name: 'FastAPI',
+                description: 'Modern, fast web framework for building APIs',
+                rules: ['fastapi-development']
+            },
+            {
+                id: 'django',
+                name: 'Django',
+                description: 'High-level Python web framework',
+                rules: ['django-development']
+            },
+            {
+                id: 'flask',
+                name: 'Flask',
+                description: 'Lightweight WSGI web application framework',
+                rules: ['flask-development']
             }
         ]
     }
